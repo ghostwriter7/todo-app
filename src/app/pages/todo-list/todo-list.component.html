@@ -1,30 +1,41 @@
 <div class="container">
   <ul>
     <li
-      (mouseenter)="selectedTodoIdx = i"
+      [ngClass]="{ active: selectedTodoIdx === i }"
+      (mouseenter)="selectedTodoIdx = i;"
       (mouseleave)="selectedTodoIdx = null"
-      (click)="onCheck(i)"
-      *ngFor="let item of mockup; let i = index"
+      (click)="onCheck(item)"
+      *ngFor="let item of mockup | filterTodos:filteringMode; let i = index"
       class="flex">
-        <span
-          [ngClass]="{'checked': isChecked(i)}"
-          class="circle"
-        ></span>
-        <span class="text">{{ item.content }}</span>
-        <button
-          *ngIf="selectedTodoIdx === i"
-          (click)="onDelete(i)"
-        >X</button>
+      <span
+        [ngClass]="{ checked: !item.isActive }"
+        class="circle">
+      </span>
+      <span
+        [ngClass]="{ completed: !item.isActive }"
+        class="text">{{ item.content }}</span>
+      <span class="spacer"></span>
+      <button
+        class="delete-btn"
+        *ngIf="selectedTodoIdx === i"
+        (click)="onDelete(i)">
+      </button>
     </li>
   </ul>
   <div class="filter-container flex row">
-    <span class="items-left">5 items left</span>
+    <span class="items-left">{{ todosLeft }} items left</span>
     <div>
-      <button>All</button>
-      <button>Active</button>
-      <button>Completed</button>
+      <button
+        (click)="filteringMode = 'All'"
+        [ngClass]="{ active: filteringMode === 'All' }">All</button>
+      <button
+        (click)="filteringMode = 'Active'"
+        [ngClass]="{ active: filteringMode === 'Active' }">Active</button>
+      <button
+        (click)="filteringMode = 'Completed'"
+        [ngClass]="{ active: filteringMode === 'Completed' }">Completed</button>
     </div>
-    <button>Clear Completed</button>
+    <button (click)="onClearCompleted()">Clear Completed</button>
   </div>
 </div>
 

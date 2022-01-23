@@ -1,36 +1,48 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ITodoItem } from '../../core/interfaces';
 
 @Component({
   selector: 'app-todo-list',
   templateUrl: './todo-list.component.html',
-  styleUrls: ['./todo-list.component.scss']
+  styleUrls: ['./todo-list.component.scss'],
 })
-export class TodoListComponent {
+export class TodoListComponent implements OnInit {
   public selectedTodoIdx: number | null = null;
-  public checkedTodos: number[] = [];
+  public filteringMode: 'All' | 'Active' | 'Completed' = 'All';
+  public todosLeft?: number;
 
   public mockup: ITodoItem[] = [
-    { content: 'Prepare portfolio', isActive: true },
-    { content: 'Cook breakfast', isActive: true },
-    { content: 'Go for a hike', isActive: true },
-    { content: 'Live to the fullest', isActive: true },
-    { content: 'Have a cup of cocoa', isActive: false }
+    {content: 'Prepare portfolio', isActive: true},
+    {content: 'Cook breakfast', isActive: true},
+    {content: 'Go for a hike', isActive: true},
+    {content: 'Live to the fullest', isActive: true},
+    {content: 'Have a cup of cocoa', isActive: true}
   ];
+
+  ngOnInit(): void {
+    this.countLeftTodos();
+  }
 
   public onDelete(i: number): void {
     this.mockup.splice(i, 1);
+    this.countLeftTodos();
   }
 
-  public onCheck(i: number): void {
-    if (this.checkedTodos.find(item => item === i) !== undefined) {
-      this.checkedTodos = this.checkedTodos.filter(todo => todo !== i);
-    } else {
-      this.checkedTodos.push(i);
-    }
+  public onCheck(clickedTodo: ITodoItem): void {
+    const todo = this.mockup.find(item => item.content === clickedTodo.content)!;
+
+    todo.isActive = !todo.isActive;
+
+    this.countLeftTodos();
   }
 
-  public isChecked(i: number): boolean {
-    return this.checkedTodos.find(todo => todo === i) !== undefined;
+  public onClearCompleted(): void {
+    this.filteringMode = 'All';
+    this.mockup = this.mockup.filter(todo => todo.isActive);
+    this.countLeftTodos();
+  }
+
+  private countLeftTodos(): void {
+    this.todosLeft = this.mockup.filter(todo => todo.isActive).length;
   }
 }

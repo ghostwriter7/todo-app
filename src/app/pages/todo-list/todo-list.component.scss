@@ -6,6 +6,32 @@
 
 .filter-container {
   justify-content: space-between;
+  background-color: $dark-color-darkest-gray;
+  padding: 1rem;
+  font-size: .8rem;
+  color: $dark-color-dark-gray;
+
+  button {
+    background-color: transparent;
+    border: none;
+    color: inherit;
+    font-weight: 700;
+    font-size: .7rem;
+    cursor: pointer;
+
+    &.active {
+      color: $color-primary;
+      pointer-events: none;
+    }
+
+    &:hover {
+      color: $dark-color-lightest-hover;
+    }
+  }
+
+  div button:not(:last-of-type) {
+    margin-right: .5rem;
+  }
 }
 
 li {
@@ -13,6 +39,27 @@ li {
   color: $dark-color-light-gray;
   background-color: $dark-color-darkest-gray;
   align-items: center;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-bottom-color: $dark-color-dark-gray;
+
+  &.active {
+    .circle {
+      border: 2px solid transparent;
+      background-image: linear-gradient($dark-color-darkest-gray, $dark-color-darkest-gray),
+      $color-check-bg;
+      background-origin: border-box;
+      background-clip: content-box, border-box;
+      border-radius: 100%;
+    }
+
+    .checked {
+      background-image: $color-check-bg;
+      background-origin: initial;
+      background-clip: initial;
+      border: none;
+    }
+  }
 }
 
 .circle {
@@ -26,24 +73,8 @@ li {
   background-clip: padding-box;
 }
 
-.circle:hover{
-  border: 2px solid transparent;
-  background-image: linear-gradient($dark-color-darkest-gray, $dark-color-darkest-gray),
-  $color-check-bg;
-  background-origin: border-box;
-  background-clip: content-box, border-box;
-  border-radius: 100%;
-}
-
 .checked {
   background-image: $color-check-bg;
-  border: none;
-}
-
-.checked:hover {
-  background-image: $color-check-bg;
-  background-origin: initial;
-  background-clip: initial;
   border: none;
 }
 
@@ -58,4 +89,20 @@ li {
   background-repeat: no-repeat;
   background-position: center;
   background-size: 50%;
+}
+
+.delete-btn {
+  background-color: transparent;
+  border: none;
+  background-image: url('../../../assets/img/icon-cross.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+}
+
+.completed {
+  text-decoration: line-through;
+  color: $dark-color-dark-gray;
 }
