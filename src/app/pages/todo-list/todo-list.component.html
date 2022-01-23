@@ -1,7 +1,20 @@
 <div class="container">
   <ul>
-    <li *ngFor="let item of mockup">
-      {{ item.content }}
+    <li
+      (mouseenter)="selectedTodoIdx = i"
+      (mouseleave)="selectedTodoIdx = null"
+      (click)="onCheck(i)"
+      *ngFor="let item of mockup; let i = index"
+      class="flex">
+        <span
+          [ngClass]="{'checked': isChecked(i)}"
+          class="circle"
+        ></span>
+        <span class="text">{{ item.content }}</span>
+        <button
+          *ngIf="selectedTodoIdx === i"
+          (click)="onDelete(i)"
+        >X</button>
     </li>
   </ul>
   <div class="filter-container flex row">

@@ -9,7 +9,53 @@
 }
 
 li {
-  padding: 1rem 3rem;
+  padding: 1rem;
   color: $dark-color-light-gray;
   background-color: $dark-color-darkest-gray;
+  align-items: center;
+}
+
+.circle {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  border-radius: 100%;
+  border: 2px solid $dark-color-dark-gray;
+  margin-right: 10px;
+  background: transparent;
+  background-clip: padding-box;
+}
+
+.circle:hover{
+  border: 2px solid transparent;
+  background-image: linear-gradient($dark-color-darkest-gray, $dark-color-darkest-gray),
+  $color-check-bg;
+  background-origin: border-box;
+  background-clip: content-box, border-box;
+  border-radius: 100%;
+}
+
+.checked {
+  background-image: $color-check-bg;
+  border: none;
+}
+
+.checked:hover {
+  background-image: $color-check-bg;
+  background-origin: initial;
+  background-clip: initial;
+  border: none;
+}
+
+.checked::after {
+  width: 20px;
+  height: 20px;
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-image: url('../../../assets/img/icon-check.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 50%;
 }

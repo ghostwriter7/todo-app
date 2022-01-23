@@ -7,7 +7,7 @@ import { TodoListComponent } from './pages/todo-list/todo-list.component';
 @NgModule({
   declarations: [
     AppComponent,
-    TodoListComponent
+    TodoListComponent,
   ],
   imports: [
     BrowserModule
