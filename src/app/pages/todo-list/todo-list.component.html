@@ -1,0 +1,17 @@
+<div class="container">
+  <ul>
+    <li *ngFor="let item of mockup">
+      {{ item.content }}
+    </li>
+  </ul>
+  <div class="filter-container flex row">
+    <span class="items-left">5 items left</span>
+    <div>
+      <button>All</button>
+      <button>Active</button>
+      <button>Completed</button>
+    </div>
+    <button>Clear Completed</button>
+  </div>
+</div>
+

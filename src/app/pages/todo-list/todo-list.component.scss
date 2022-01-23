@@ -1,0 +1,15 @@
+@import '../../../assets/style/colors';
+
+:host {
+  width: min(100%, 700px);
+}
+
+.filter-container {
+  justify-content: space-between;
+}
+
+li {
+  padding: 1rem 3rem;
+  color: $dark-color-light-gray;
+  background-color: $dark-color-darkest-gray;
+}
