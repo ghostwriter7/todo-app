@@ -1,7 +1,14 @@
 @import '../../../assets/style/colors';
 
 :host {
-  width: min(100%, 700px);
+  width: min(100%, 600px);
+}
+
+.container {
+  box-shadow: -5px 10px 15px rgba(0,0,0,.4),
+               5px 10px 15px rgba(0,0,0,.4);
+  border-radius: .25rem;
+  overflow: hidden;
 }
 
 .filter-container {
@@ -76,19 +83,19 @@ li {
 .checked {
   background-image: $color-check-bg;
   border: none;
-}
 
-.checked::after {
-  width: 20px;
-  height: 20px;
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  background-image: url('../../../assets/img/icon-check.svg');
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 50%;
+  &::after {
+    width: 20px;
+    height: 20px;
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    background-image: url('../../../assets/img/icon-check.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 50%;
+  }
 }
 
 .delete-btn {
@@ -105,4 +112,12 @@ li {
 .completed {
   text-decoration: line-through;
   color: $dark-color-dark-gray;
+}
+
+.drag-info {
+  margin-top: 3rem;
+  font-size: .8rem;
+  text-align: center;
+  color: $dark-color-dark-gray;
+  font-weight: 700;
 }

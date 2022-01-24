@@ -1,6 +1,14 @@
 <div class="container">
   <ul>
     <li
+      [id]="i"
+      #ref
+      [draggable]="filteringMode === 'All'"
+      (dragstart)="onDragStart($event)"
+      (dragover)="onDragOver($event)"
+      (dragenter)="onDragEnter(ref)"
+      (dragleave)="onDragLeave(ref)"
+      (drop)="onDrop($event, ref)"
       [ngClass]="{ active: selectedTodoIdx === i }"
       (mouseenter)="selectedTodoIdx = i;"
       (mouseleave)="selectedTodoIdx = null"
@@ -38,4 +46,6 @@
     <button (click)="onClearCompleted()">Clear Completed</button>
   </div>
 </div>
+
+<p class="drag-info">Drag and drop to reorder list</p>
 
