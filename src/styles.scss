@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;700&display=swap');
 @import 'assets/style/list';
 @import 'assets/style/flex';
+@import 'assets/style/colors';
 
 * {
   box-sizing: border-box;
@@ -10,6 +11,10 @@
 
 body {
   font-family: 'Josefin Sans', sans-serif;
+  background-image: url('./assets/img/bg-desktop-dark.jpg');
+  background-position: top center;
+  background-repeat: no-repeat;
+  background-color: $dark-color-darkest;
 }
 
 app-root {

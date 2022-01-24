@@ -1,7 +1,8 @@
 @import '../../../assets/style/colors';
 
 :host {
-  width: min(100%, 600px);
+  display: block;
+  width: 100%;
 }
 
 .container {

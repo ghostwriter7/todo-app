@@ -1,0 +1,46 @@
+@import '../../../assets/style/colors';
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.wrapper {
+  position: relative;
+}
+
+input {
+  width: min(100%, 600px);
+  display: block;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1rem 1rem calc(1rem + 30px);
+  position: relative;
+
+  font-family: inherit;
+  font-size: 1rem;
+  color: $dark-color-light-gray;
+  background-color: $dark-color-darkest-gray;
+  cursor: pointer;
+
+  border: 1px solid transparent;
+  border-bottom-color: $dark-color-dark-gray;
+  border-radius: .25rem;
+
+  outline: none;
+
+  box-shadow: -5px 10px 15px rgba(0,0,0,.4),
+  5px 10px 15px rgba(0,0,0,.4);
+}
+
+.circle {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  transform: translateY(-50%);
+  border-radius: 100%;
+  border: 2px solid $dark-color-dark-gray;
+  background-color: transparent;
+  z-index: 10;
+}

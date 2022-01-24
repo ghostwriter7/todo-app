@@ -1,47 +1,48 @@
-import { Component, OnInit, Renderer2 } from '@angular/core';
+import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { ITodoItem } from '../../core/interfaces';
+import { TodoService } from '../../core/services/todo.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-todo-list',
   templateUrl: './todo-list.component.html',
   styleUrls: ['./todo-list.component.scss'],
 })
-export class TodoListComponent implements OnInit {
+export class TodoListComponent implements OnInit, OnDestroy {
   public selectedTodoIdx: number | null = null;
   public filteringMode: 'All' | 'Active' | 'Completed' = 'All';
   public todosLeft?: number;
 
-  public mockup: ITodoItem[] = [
-    {content: 'Prepare portfolio', isActive: true},
-    {content: 'Cook breakfast', isActive: true},
-    {content: 'Go for a hike', isActive: true},
-    {content: 'Live to the fullest', isActive: true},
-    {content: 'Have a cup of cocoa', isActive: true}
-  ];
+  public mockup: ITodoItem[] = [];
 
-  constructor(private renderer: Renderer2) {}
+  private todosSub!: Subscription;
+  private newTodoSub!: Subscription;
+
+  constructor(
+    private renderer: Renderer2,
+    private todoService: TodoService
+  ) {}
 
   ngOnInit(): void {
+    this.todosSub = this.todoService.getTodos().subscribe(todos => {
+      this.mockup = todos;
+      this.countLeftTodos();
+    });
+
     this.countLeftTodos();
   }
 
-  public onDelete(i: number): void {
-    this.mockup.splice(i, 1);
-    this.countLeftTodos();
+  public onDelete(item: ITodoItem): void {
+    this.todoService.deleteTodo(item);
   }
 
-  public onCheck(clickedTodo: ITodoItem): void {
-    const todo = this.mockup.find(item => item.content === clickedTodo.content)!;
-
-    todo.isActive = !todo.isActive;
-
-    this.countLeftTodos();
+  public onToggleStatus(clickedTodo: ITodoItem): void {
+    this.todoService.toggleStatus(clickedTodo);
   }
 
   public onClearCompleted(): void {
     this.filteringMode = 'All';
-    this.mockup = this.mockup.filter(todo => todo.isActive);
-    this.countLeftTodos();
+    this.todoService.clearCompleted();
   }
 
   public onDragEnter(todo: HTMLElement): void {
@@ -73,5 +74,10 @@ export class TodoListComponent implements OnInit {
 
   private countLeftTodos(): void {
     this.todosLeft = this.mockup.filter(todo => todo.isActive).length;
+  }
+
+  ngOnDestroy(): void {
+    this.todosSub.unsubscribe();
+    this.newTodoSub.unsubscribe();
   }
 }

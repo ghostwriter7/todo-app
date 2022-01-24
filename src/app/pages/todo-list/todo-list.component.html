@@ -12,7 +12,7 @@
       [ngClass]="{ active: selectedTodoIdx === i }"
       (mouseenter)="selectedTodoIdx = i;"
       (mouseleave)="selectedTodoIdx = null"
-      (click)="onCheck(item)"
+      (click)="onToggleStatus(item)"
       *ngFor="let item of mockup | filterTodos:filteringMode; let i = index"
       class="flex">
       <span
@@ -26,7 +26,7 @@
       <button
         class="delete-btn"
         *ngIf="selectedTodoIdx === i"
-        (click)="onDelete(i)">
+        (click)="onDelete(item)">
       </button>
     </li>
   </ul>
