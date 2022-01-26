@@ -14,7 +14,7 @@
 
 .filter-container {
   justify-content: space-between;
-  background-color: $dark-color-darkest-gray;
+  background-color: $dark-color-desaturated;
   padding: 1rem;
   font-size: .8rem;
   color: $dark-color-dark-gray;
@@ -42,19 +42,36 @@
   }
 }
 
+ul {
+  min-height: 270px;
+  background-color: $dark-color-desaturated;
+  position: relative;
+}
+
+ul.empty::before {
+  content: 'There are no Todos...';
+  color: $dark-color-light-gray;
+  font-size: 1.1rem;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 li {
   padding: 1rem;
   color: $dark-color-light-gray;
-  background-color: $dark-color-darkest-gray;
+  background-color: $dark-color-desaturated;
   align-items: center;
   cursor: pointer;
   border: 1px solid transparent;
-  border-bottom-color: $dark-color-dark-gray;
+  border-bottom-color: $dark-color-darkest-gray;
 
   &.active {
     .circle {
       border: 2px solid transparent;
-      background-image: linear-gradient($dark-color-darkest-gray, $dark-color-darkest-gray),
+      background-image: linear-gradient($dark-color-desaturated, $dark-color-desaturated),
       $color-check-bg;
       background-origin: border-box;
       background-clip: content-box, border-box;

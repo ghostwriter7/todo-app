@@ -1,5 +1,5 @@
 <div class="container">
-  <ul>
+  <ul [ngClass]="{empty: !anyTodosOnList}">
     <li
       [id]="i"
       #ref
@@ -13,7 +13,7 @@
       (mouseenter)="selectedTodoIdx = i;"
       (mouseleave)="selectedTodoIdx = null"
       (click)="onToggleStatus(item)"
-      *ngFor="let item of mockup | filterTodos:filteringMode; let i = index"
+      *ngFor="let item of mockup; let i = index"
       class="flex">
       <span
         [ngClass]="{ checked: !item.isActive }"
@@ -34,13 +34,13 @@
     <span class="items-left">{{ todosLeft }} items left</span>
     <div>
       <button
-        (click)="filteringMode = 'All'"
+        (click)="onChangeMode('All')"
         [ngClass]="{ active: filteringMode === 'All' }">All</button>
       <button
-        (click)="filteringMode = 'Active'"
+        (click)="onChangeMode('Active')"
         [ngClass]="{ active: filteringMode === 'Active' }">Active</button>
       <button
-        (click)="filteringMode = 'Completed'"
+        (click)="onChangeMode('Completed')"
         [ngClass]="{ active: filteringMode === 'Completed' }">Completed</button>
     </div>
     <button (click)="onClearCompleted()">Clear Completed</button>

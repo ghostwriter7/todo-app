@@ -10,9 +10,10 @@ import { Subscription } from 'rxjs';
 })
 export class TodoListComponent implements OnInit, OnDestroy {
   public selectedTodoIdx: number | null = null;
-  public filteringMode: 'All' | 'Active' | 'Completed' = 'All';
+  public filteringMode = 'All';
   public todosLeft?: number;
-
+  public currentPage = 0;
+  public anyTodosOnList?: boolean;
   public mockup: ITodoItem[] = [];
 
   private todosSub!: Subscription;
@@ -24,12 +25,13 @@ export class TodoListComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.todosSub = this.todoService.getTodos().subscribe(todos => {
+    this.todosSub = this.todoService.todos$.subscribe(todos => {
       this.mockup = todos;
-      this.countLeftTodos();
+      this.anyTodosOnList = !!this.mockup.length;
+      this.todosLeft = this.todoService.countLeftTodos();
     });
 
-    this.countLeftTodos();
+    this.todoService.getTodos(0);
   }
 
   public onDelete(item: ITodoItem): void {
@@ -43,6 +45,11 @@ export class TodoListComponent implements OnInit, OnDestroy {
   public onClearCompleted(): void {
     this.filteringMode = 'All';
     this.todoService.clearCompleted();
+  }
+
+  public onChangeMode(mode: string) {
+    this.filteringMode = mode;
+    this.todoService.getTodos(this.currentPage, mode);
   }
 
   public onDragEnter(todo: HTMLElement): void {
@@ -70,10 +77,6 @@ export class TodoListComponent implements OnInit, OnDestroy {
     this.renderer.setStyle(todo, 'opacity', 1);
 
     [this.mockup[draggedID], this.mockup[droppedID]] = [this.mockup[droppedID], this.mockup[draggedID]];
-  }
-
-  private countLeftTodos(): void {
-    this.todosLeft = this.mockup.filter(todo => todo.isActive).length;
   }
 
   ngOnDestroy(): void {

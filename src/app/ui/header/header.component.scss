@@ -1,0 +1,42 @@
+:host {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  margin-bottom: 4rem;
+}
+
+.app-title {
+  color: #fff;
+  font-size: 3em;
+}
+
+.toggle-theme {
+  cursor: pointer;
+  background-image: url('../../../assets/img/icon-sun.svg');
+  background-repeat: no-repeat;
+  background-size: 1.8rem 1.8rem;
+  width: 1.8rem;
+  height: 1.8rem;
+  background-color: transparent;
+  border: 0;
+}
+
+.toggle-theme:hover {
+  animation: rotate 2s infinite linear;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+    opacity: 1;
+  }
+
+  50% {
+    opacity: .7;
+  }
+  100% {
+    transform: rotate(360deg);
+    opacity: 1;
+  }
+
+}

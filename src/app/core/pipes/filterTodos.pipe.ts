@@ -1,11 +1,16 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { ITodoItem } from '../interfaces';
+import { TodoService } from '../services/todo.service';
 
 @Pipe({
   name: 'filterTodos'
 })
 export class FilterTodosPipe implements PipeTransform {
-  transform(value: ITodoItem[] | null, mode: 'All' | 'Active' | 'Completed'): any {
+  constructor(private todosService: TodoService) {}
+
+  transform(value: ITodoItem[] | null, mode: 'All' | 'Active' | 'Completed', currentPage: number): any {
+    this.todosService.getTodos(currentPage);
+
     if (!value) {
       return;
     }
