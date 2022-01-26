@@ -1,7 +1,8 @@
-import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
+import { Component, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { ITodoItem } from '../../core/interfaces';
 import { TodoService } from '../../core/services/todo.service';
 import { Subscription } from 'rxjs';
+import { PlaceholderDirective } from '../../core/directives/placeholder.directive';
 
 @Component({
   selector: 'app-todo-list',

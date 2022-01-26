@@ -1,15 +1,19 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, ViewChild } from '@angular/core';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { ITodoItem } from '../interfaces';
+import { PlaceholderDirective } from '../directives/placeholder.directive';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TodoService {
+  @ViewChild(PlaceholderDirective) alertHost!: PlaceholderDirective;
   public mockup: ITodoItem[] = [];
 
   private todosChanged = new BehaviorSubject<ITodoItem[]>(this.mockup);
+  private errorEmitter = new Subject<string>();
   public todos$ = this.todosChanged.asObservable();
+  public error$ = this.errorEmitter.asObservable();
 
   private currentPage = 0;
 
@@ -63,7 +67,12 @@ export class TodoService {
   }
 
   public addTodo(todo: string): void {
-    this.mockup.unshift({content: todo, isActive: true});
+    if (this.mockup.find(item => item.content === todo)) {
+      this.errorEmitter.next('Such a Todo already exists!');
+      return;
+    }
+
+    this.mockup.unshift({ content: todo, isActive: true });
     this.getTodos(this.currentPage);
 
     this.saveInLocalStorage();
