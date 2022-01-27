@@ -28,11 +28,12 @@ export class TodoListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.todosSub = this.todoService.todos$.subscribe(todos => {
       this.mockup = todos;
+
       this.anyTodosOnList = !!this.mockup.length;
       this.todosLeft = this.todoService.countLeftTodos();
     });
 
-    this.todoService.getTodos(0);
+    this.todoService.getTodos(this.currentPage);
   }
 
   public onDelete(item: ITodoItem): void {
@@ -40,7 +41,7 @@ export class TodoListComponent implements OnInit, OnDestroy {
   }
 
   public onToggleStatus(clickedTodo: ITodoItem): void {
-    this.todoService.toggleStatus(clickedTodo);
+    this.todoService.toggleStatus(clickedTodo, this.filteringMode);
   }
 
   public onClearCompleted(): void {
@@ -78,6 +79,16 @@ export class TodoListComponent implements OnInit, OnDestroy {
     this.renderer.setStyle(todo, 'opacity', 1);
 
     [this.mockup[draggedID], this.mockup[droppedID]] = [this.mockup[droppedID], this.mockup[draggedID]];
+  }
+
+  public onNextPage(): void {
+    this.currentPage++;
+    this.todoService.getTodos(this.currentPage, this.filteringMode);
+  }
+
+  public onPrevPage(): void {
+    this.currentPage--;
+    this.todoService.getTodos(this.currentPage, this.filteringMode);
   }
 
   ngOnDestroy(): void {

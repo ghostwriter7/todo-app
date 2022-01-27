@@ -35,17 +35,29 @@
     <div>
       <button
         (click)="onChangeMode('All')"
-        [ngClass]="{ active: filteringMode === 'All' }">All</button>
+        [ngClass]="{ active: filteringMode === 'All' }">All
+      </button>
       <button
         (click)="onChangeMode('Active')"
-        [ngClass]="{ active: filteringMode === 'Active' }">Active</button>
+        [ngClass]="{ active: filteringMode === 'Active' }">Active
+      </button>
       <button
         (click)="onChangeMode('Completed')"
-        [ngClass]="{ active: filteringMode === 'Completed' }">Completed</button>
+        [ngClass]="{ active: filteringMode === 'Completed' }">Completed
+      </button>
     </div>
     <button (click)="onClearCompleted()">Clear Completed</button>
   </div>
 </div>
-
-<p class="drag-info">Drag and drop to reorder list</p>
+<div class="todo-footer">
+  <button
+    (click)="onPrevPage()"
+    [ngClass]="{ disabled: !(todosLeft && todosLeft > 5 && currentPage >= 1) }"
+    class="btn btn-prev">PREV</button>
+  <p class="drag-info">Drag and drop to reorder list</p>
+  <button
+    (click)="onNextPage()"
+    [ngClass]="{ disabled: !(todosLeft && (currentPage + 1) * 5 < todosLeft) }"
+    class="btn btn-next">NEXT</button>
+</div>
 

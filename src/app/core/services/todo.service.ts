@@ -49,12 +49,12 @@ export class TodoService {
     this.saveInLocalStorage();
   }
 
-  public toggleStatus(clickedTodo: ITodoItem): void {
+  public toggleStatus(clickedTodo: ITodoItem, mode: string): void {
     const todo = this.mockup.find(item => item.content === clickedTodo.content)!;
 
     todo.isActive = !todo.isActive;
 
-    this.getTodos(this.currentPage);
+    this.getTodos(this.currentPage, mode);
 
     this.saveInLocalStorage();
   }

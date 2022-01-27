@@ -132,10 +132,37 @@ li {
   color: $dark-color-dark-gray;
 }
 
-.drag-info {
-  margin-top: 3rem;
-  font-size: .8rem;
-  text-align: center;
-  color: $dark-color-dark-gray;
-  font-weight: 700;
+.todo-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .drag-info {
+    margin-block: 3rem;
+    font-size: .8rem;
+    text-align: center;
+    color: $dark-color-dark-gray;
+    font-weight: 700;
+  }
 }
+
+.disabled {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+.btn {
+  opacity: 0.5;
+  background-image: $color-check-bg;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 100%;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.btn:hover {
+  opacity: 1;
+}
+
