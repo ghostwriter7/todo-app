@@ -3,6 +3,7 @@ import { TodoService } from './core/services/todo.service';
 import { PlaceholderDirective } from './core/directives/placeholder.directive';
 import { NotificationComponent } from './ui/notification/notification.component';
 import { Subscription } from 'rxjs';
+import { ThemeService } from '../theme/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -16,7 +17,8 @@ export class AppComponent implements OnInit {
 
   constructor(
     private todosService: TodoService,
-    private componentFactoryResolver: ComponentFactoryResolver
+    private componentFactoryResolver: ComponentFactoryResolver,
+    private themeService: ThemeService
     ) {}
 
   ngOnInit(): void {
@@ -24,7 +26,9 @@ export class AppComponent implements OnInit {
 
     this.todosService.error$.subscribe((error) => {
       this.showErrorAlert(error);
-    })
+    });
+
+    this.themeService.loadTheme();
   }
 
   private showErrorAlert(error: string): void {

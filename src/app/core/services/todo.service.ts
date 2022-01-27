@@ -17,6 +17,10 @@ export class TodoService {
 
   private currentPage = 0;
 
+  get completed(): number {
+    return this.mockup.filter(todo => !todo.isActive).length;
+  }
+
   public getTodos(pageIndex: number, mode?: string) {
     this.currentPage = pageIndex;
 
@@ -38,8 +42,22 @@ export class TodoService {
     this.todosChanged.next(curTodos);
   }
 
-  public countLeftTodos() {
+  public countLeftTodos(): number {
     return this.mockup.filter(todo => todo.isActive).length;
+  }
+
+  public countTodosForBtn(mode: string): number {
+    switch (mode) {
+      case 'Active': {
+        return this.countLeftTodos();
+      }
+      case 'Completed': {
+        return this.mockup.filter(todo => !todo.isActive).length;
+      }
+      default: {
+        return this.mockup.length;
+      }
+    }
   }
 
   public deleteTodo(todo: ITodoItem): void {

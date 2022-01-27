@@ -22,7 +22,7 @@ export class TodoListComponent implements OnInit, OnDestroy {
 
   constructor(
     private renderer: Renderer2,
-    private todoService: TodoService
+    public todoService: TodoService
   ) {}
 
   ngOnInit(): void {
@@ -89,6 +89,10 @@ export class TodoListComponent implements OnInit, OnDestroy {
   public onPrevPage(): void {
     this.currentPage--;
     this.todoService.getTodos(this.currentPage, this.filteringMode);
+  }
+
+  public currentPageLength(): number {
+    return this.todoService.countTodosForBtn(this.filteringMode);
   }
 
   ngOnDestroy(): void {

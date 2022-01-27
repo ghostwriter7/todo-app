@@ -10,13 +10,25 @@ export class ThemeService {
   public toggleTheme(): void {
     this.active = this.active === dark ? light : dark;
 
+    this.saveFavoriteTheme();
     this.setActiveTheme();
   }
 
-  setActiveTheme(): void {
+  public setActiveTheme(): void {
     Object.keys(this.active.properties).forEach(property => {
       document.documentElement.style.setProperty(property, this.active.properties[property]);
-    })
+    });
   }
 
+  public loadTheme(): void {
+    const favoriteTheme = localStorage.getItem('theme');
+
+    this.active = favoriteTheme === 'dark' ? dark : light;
+    this.setActiveTheme();
+  }
+
+
+  private saveFavoriteTheme(): void {
+    localStorage.setItem('theme', this.active.name);
+  }
 }
