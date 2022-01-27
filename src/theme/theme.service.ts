@@ -23,7 +23,7 @@ export class ThemeService {
   public loadTheme(): void {
     const favoriteTheme = localStorage.getItem('theme');
 
-    this.active = favoriteTheme === 'dark' ? dark : light;
+    this.active = favoriteTheme === 'light' ? light : dark;
     this.setActiveTheme();
   }
 
