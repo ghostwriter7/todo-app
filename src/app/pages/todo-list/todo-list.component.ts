@@ -55,7 +55,7 @@ export class TodoListComponent implements OnInit, OnDestroy {
   }
 
   public onDragEnter(todo: HTMLElement): void {
-    this.renderer.setStyle(todo, 'opacity', 0.7);
+    this.renderer.setStyle(todo, 'opacity', 0.5);
   }
 
   public onDragLeave(todo: HTMLElement): void {

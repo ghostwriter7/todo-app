@@ -1,26 +1,24 @@
-@import '../../../assets/style/colors';
-
 .notification-wrapper {
   position: absolute;
   top: 5%;
   right: 5%;
 
-  background-color: $dark-color-darkest;
+  background-color: var(--bg-color);
   padding: 1rem 1.5rem;
   box-shadow: 5px 5px 10px rgba(0,0,0,.3);
   border: 2px solid transparent;
-  border-image: $color-check-bg;
+  border-image: var(--gradient);
   border-image-slice: 1;
 
   h1 {
-    color: $dark-color-lightest-hover;
-    border-bottom: 1px dashed $dark-color-light-gray;
+    color: var(--color-text-hover);
+    border-bottom: 1px dashed var(--color-text-primary);
     padding-bottom: 0.5rem;
     opacity: .9;
     text-transform: uppercase;
     font-size: 1.1rem;
     letter-spacing: 2px;
-    background-image: $color-check-bg;
+    background-image: var(--gradient);
     background-size: 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -28,6 +26,6 @@
 
   p {
     padding-block: 1rem 0;
-    color: $dark-color-light-gray;
+    color: var(--color-text-primary);
   }
 }

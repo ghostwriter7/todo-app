@@ -1,7 +1,26 @@
 @import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;700&display=swap');
 @import 'assets/style/list';
 @import 'assets/style/flex';
-@import 'assets/style/colors';
+
+:root {
+  --color-primary: hsl(220, 98%, 61%);
+  --bg-color: hsl(235, 21%, 11%);
+  --bg-secondary-color: hsl(235, 24%, 19%);
+  --color-text-primary: hsl(234, 39%, 85%);
+  --color-text-hover: hsl(236, 33%, 92%);
+  --color-accent: hsl(233, 14%, 35%);
+  --color-border: hsl(237, 14%, 26%);
+
+  --gradient: linear-gradient(to right, hsl(192, 100%, 67%), hsl(280, 87%, 65%));
+
+  --background-image: url('./assets/img/bg-desktop-dark.jpg');
+  --background-image-mobile: url('./assets/img/bg-mobile-dark.jpg');
+  --toggle-theme-icon: url('./assets/img/icon-sun.svg');
+  --toggle-theme-anim: rotate;
+
+  --box-shadow: -5px 10px 15px rgba(0,0,0,.4),
+  5px 10px 15px rgba(0,0,0,.4);
+}
 
 * {
   box-sizing: border-box;
@@ -11,12 +30,18 @@
 
 body {
   font-family: 'Josefin Sans', sans-serif;
-  background-image: url('./assets/img/bg-desktop-dark.jpg');
+  background-image: var(--background-image);
   background-position: top center;
   background-repeat: no-repeat;
-  background-color: $dark-color-darkest;
+  background-color: var(--bg-color);
 
   overflow: hidden;
+}
+
+@media screen and (max-width: 375px) {
+  body {
+    background-image: var(--background-image-mobile);
+  }
 }
 
 app-root {

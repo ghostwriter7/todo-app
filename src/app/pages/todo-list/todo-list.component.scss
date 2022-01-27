@@ -1,23 +1,20 @@
-@import '../../../assets/style/colors';
-
 :host {
   display: block;
   width: 100%;
 }
 
 .container {
-  box-shadow: -5px 10px 15px rgba(0,0,0,.4),
-               5px 10px 15px rgba(0,0,0,.4);
+  box-shadow: var(--box-shadow);
   border-radius: .25rem;
   overflow: hidden;
 }
 
 .filter-container {
   justify-content: space-between;
-  background-color: $dark-color-desaturated;
+  background-color: var(--bg-secondary-color);
   padding: 1rem;
   font-size: .8rem;
-  color: $dark-color-dark-gray;
+  color: var(--color-accent);
 
   button {
     background-color: transparent;
@@ -28,12 +25,12 @@
     cursor: pointer;
 
     &.active {
-      color: $color-primary;
+      color: var(--color-primary);
       pointer-events: none;
     }
 
     &:hover {
-      color: $dark-color-lightest-hover;
+      color: var(--color-text-hover);
     }
   }
 
@@ -44,13 +41,13 @@
 
 ul {
   min-height: 270px;
-  background-color: $dark-color-desaturated;
+  background-color: var(--bg-secondary-color);
   position: relative;
 }
 
 ul.empty::before {
   content: 'There are no Todos...';
-  color: $dark-color-light-gray;
+  color: var(--color-text-primary);
   font-size: 1.1rem;
   position: absolute;
   inset: 0;
@@ -61,25 +58,25 @@ ul.empty::before {
 
 li {
   padding: 1rem;
-  color: $dark-color-light-gray;
-  background-color: $dark-color-desaturated;
+  color: var(--color-text-primary);
+  background-color: var(--bg-secondary-color);
   align-items: center;
   cursor: pointer;
   border: 1px solid transparent;
-  border-bottom-color: $dark-color-darkest-gray;
+  border-bottom-color: var(--color-border);
 
   &.active {
     .circle {
       border: 2px solid transparent;
-      background-image: linear-gradient($dark-color-desaturated, $dark-color-desaturated),
-      $color-check-bg;
+      background-image: linear-gradient(var(--bg-secondary-color), var(--bg-secondary-color)),
+      var(--gradient);
       background-origin: border-box;
       background-clip: content-box, border-box;
       border-radius: 100%;
     }
 
     .checked {
-      background-image: $color-check-bg;
+      background-image: var(--gradient);
       background-origin: initial;
       background-clip: initial;
       border: none;
@@ -92,14 +89,14 @@ li {
   width: 20px;
   height: 20px;
   border-radius: 100%;
-  border: 2px solid $dark-color-dark-gray;
+  border: 2px solid var(--color-accent);
   margin-right: 10px;
   background: transparent;
   background-clip: padding-box;
 }
 
 .checked {
-  background-image: $color-check-bg;
+  background-image: var(--gradient);
   border: none;
 
   &::after {
@@ -129,7 +126,7 @@ li {
 
 .completed {
   text-decoration: line-through;
-  color: $dark-color-dark-gray;
+  color: var(--color-accent);
 }
 
 .todo-footer {
@@ -141,7 +138,7 @@ li {
     margin-block: 3rem;
     font-size: .8rem;
     text-align: center;
-    color: $dark-color-dark-gray;
+    color: var(--color-accent);
     font-weight: 700;
   }
 }
@@ -153,7 +150,7 @@ li {
 
 .btn {
   opacity: 0.5;
-  background-image: $color-check-bg;
+  background-image: var(--gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-size: 100%;
