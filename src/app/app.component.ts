@@ -1,6 +1,6 @@
 import { Component, ComponentFactoryResolver, OnInit, ViewChild } from '@angular/core';
-import { TodoService } from './core/services/todo.service';
-import { PlaceholderDirective } from './core/directives/placeholder.directive';
+import { TodoService } from './pages/todo/core/services/todo.service';
+import { PlaceholderDirective } from './core/directives';
 import { NotificationComponent } from './ui/notification/notification.component';
 import { Subscription } from 'rxjs';
 import { ThemeService } from '../theme/theme.service';

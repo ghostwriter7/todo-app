@@ -1,7 +1,7 @@
 import { Injectable, ViewChild } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { ITodoItem } from '../interfaces';
-import { PlaceholderDirective } from '../directives/placeholder.directive';
+import { PlaceholderDirective } from '../../../../core/directives/';
 
 @Injectable({
   providedIn: 'root'

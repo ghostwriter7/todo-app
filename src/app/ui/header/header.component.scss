@@ -1,12 +1,13 @@
 :host {
   display: flex;
   justify-content: space-between;
-  margin-block: 7vh;
+  margin-block: 7vh 4vh;
 }
 
 .app-title {
   color: #fff;
-  font-size: 3em;
+  font-size: 2.6em;
+  letter-spacing: 12px;
 }
 
 .toggle-theme {
