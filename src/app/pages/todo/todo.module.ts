@@ -17,8 +17,6 @@ import { TodoListComponent } from './pages/todo-list/todo-list.component';
     FormsModule,
     TodoRoutingModule
   ],
-  exports: [
-
-  ]
+  exports: []
 })
 export class TodoModule {}
