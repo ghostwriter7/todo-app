@@ -1,0 +1,31 @@
+:host {
+  display: block;
+  width: 100%;
+  position: fixed;
+  top: 0;
+
+  background-color: var(--bg-color);
+  opacity: .9;
+  padding-block: 1rem;
+}
+
+.container {
+  width: min(100%, 500px);
+  margin-inline: auto;
+
+  .logout-btn {
+    margin-left: auto;
+    display: block;
+
+    font-family: inherit;
+    text-transform: uppercase;
+    background-color: transparent;
+    border: 0;
+
+    background-image: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    cursor: pointer;
+  }
+}
