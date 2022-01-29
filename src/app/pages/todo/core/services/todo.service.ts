@@ -2,6 +2,7 @@ import { Injectable, ViewChild } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { ITodoItem } from '../interfaces';
 import { PlaceholderDirective } from '../../../../core/directives/';
+import { StorageService } from '../../../../core/services/storage.service';
 
 @Injectable({
   providedIn: 'root'
@@ -20,6 +21,8 @@ export class TodoService {
   get completed(): number {
     return this.mockup.filter(todo => !todo.isActive).length;
   }
+
+  constructor(private storageService: StorageService) {}
 
   public getTodos(pageIndex: number, mode?: string) {
     this.currentPage = pageIndex;
@@ -97,14 +100,14 @@ export class TodoService {
   }
 
   public saveInLocalStorage(): void {
-    localStorage.setItem('todos', JSON.stringify(this.mockup));
+    this.storageService.saveItem('todos', this.mockup);
   }
 
   public loadTodosFromStorage(): void {
-    const todos = localStorage.getItem('todos');
+    const todos = this.storageService.getItem('todos');
 
     if (todos) {
-      this.mockup = JSON.parse(todos);
+      this.mockup = this.storageService.parseItem(todos);
       this.getTodos(this.currentPage);
     }
   }

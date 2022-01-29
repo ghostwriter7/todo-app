@@ -1,6 +1,6 @@
 <div class="wrapper">
   <div class="header">
-    <h1>{{ mode === 'login' ? 'Login' : 'Signup' }}</h1>
+    <h1>{{ mode }}</h1>
   </div>
   <form (ngSubmit)="onSubmit()" [formGroup]="form">
     <div class="form-control">
@@ -32,7 +32,8 @@
       type="submit"
       [disabled]="form.invalid"
       [ngStyle]="{ opacity: ref.disabled ? .7 : 1 }"
-    >{{ mode === 'login' ? 'Login' : 'Signup' }}</button>
+    >{{ mode }}</button>
   </form>
-
+  <p class="footer" *ngIf="mode === 'Login'">Don't have an account yet? <a routerLink="/auth/signup">Register now!</a></p>
+  <p class="footer" *ngIf="mode === 'Signup'">Already have an account? <a routerLink="/auth/login">Login now!</a></p>
 </div>

@@ -19,6 +19,7 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
 })
 export class NotificationComponent implements OnInit {
   @Input() message!: string;
+  @Input() type!: string;
   @Output() close = new EventEmitter<void>();
 
   public slideIn?: boolean;

@@ -17,7 +17,6 @@ export class TodoListComponent implements OnInit, OnDestroy {
   public mockup: ITodoItem[] = [];
 
   private todosSub!: Subscription;
-  private newTodoSub!: Subscription;
 
   constructor(
     private renderer: Renderer2,
@@ -96,6 +95,5 @@ export class TodoListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.todosSub.unsubscribe();
-    this.newTodoSub.unsubscribe();
   }
 }
