@@ -9,13 +9,15 @@ import { PlaceholderDirective } from './core/directives/placeholder.directive';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
 import { HttpClientModule } from '@angular/common/http';
+import { SpinnerComponent } from './ui/spinner/spinner.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     HeaderComponent,
     NotificationComponent,
-    PlaceholderDirective
+    PlaceholderDirective,
+    SpinnerComponent
   ],
   imports: [
     BrowserModule,

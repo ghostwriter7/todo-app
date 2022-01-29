@@ -5,6 +5,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { StorageService } from '../../../../core/services/storage.service';
 import { Router } from '@angular/router';
+import { EventsService } from '../../../../core/services/events.service';
 
 @Injectable({
   providedIn: 'root'
@@ -21,10 +22,13 @@ export class AuthService {
     private http: HttpClient,
     private notificationService: NotificationService,
     private storageService: StorageService,
-    private router: Router
+    private router: Router,
+    private eventsService: EventsService
   ) {}
 
   public login(email: string, password: string): Observable<any> {
+    this.eventsService.startLoading();
+
     return this.http.post<IAuthResponse>(`${this.baseURL}/login`, { email, password })
     .pipe(
       tap(this.handleSuccess.bind(this)),
@@ -33,6 +37,8 @@ export class AuthService {
   }
 
   public signup(email: string, password: string): Observable<any> {
+    this.eventsService.startLoading();
+
     return this.http.post<IAuthResponse>(`${this.baseURL}/signup`, { email, password })
     .pipe(
       tap(this.handleSuccess.bind(this)),
@@ -78,6 +84,8 @@ export class AuthService {
   }
 
   private handleSuccess({ email, id, token }: IAuthResponse): void {
+    this.eventsService.stopLoading();
+
     this.user = { email, id, token, expirationDate: new Date(Date.now() + 3600 * 1000)};
     this.userSubject.next(this.user);
 
@@ -87,6 +95,8 @@ export class AuthService {
   }
 
   private handleError({ error }: HttpErrorResponse): Observable<any> {
+    this.eventsService.stopLoading();
+
     this.notificationService.showNotification(error.error, 'Error');
     return throwError(() => new Error(error.error));
   }

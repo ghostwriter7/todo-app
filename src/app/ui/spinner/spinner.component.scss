@@ -1,0 +1,53 @@
+:host {
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.overlay {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(5px);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .spinner {
+    position: relative;
+
+    width: 100px;
+    height: 100px;
+    border-radius: 100%;
+
+    &::after {
+      content: '';
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      clip: rect(0, 100px, 50px, 0);
+      border-radius: 100%;
+      box-shadow: inset -5px 0 0 5px var(--color-primary);
+
+      animation: spin 1s infinite linear;
+    }
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+    box-shadow: inset -1px 0 0 1px var(--color-primary);
+  }
+  50% {
+    transform: rotate(180deg);
+    box-shadow: inset -5px 0 0 5px var(--color-primary);
+  }
+
+  100% {
+    transform: rotate(360deg);
+    box-shadow: inset -1px 0 0 1px var(--color-primary);
+  }
+}

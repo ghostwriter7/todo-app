@@ -3,6 +3,7 @@ import { PlaceholderDirective } from './core/directives';
 import { ThemeService } from '../theme/theme.service';
 import { NotificationService } from './core/services/notification.service';
 import { AuthService } from './pages/auth/core/services/auth.service';
+import { EventsService } from './core/services/events.service';
 
 @Component({
   selector: 'app-root',
@@ -12,11 +13,14 @@ import { AuthService } from './pages/auth/core/services/auth.service';
 export class AppComponent implements OnInit {
   @ViewChild(PlaceholderDirective, { static: true }) alertHost!: PlaceholderDirective;
 
+  public loading = false;
+
   constructor(
     private componentFactoryResolver: ComponentFactoryResolver,
     private themeService: ThemeService,
     private notificationService: NotificationService,
-    private authService: AuthService
+    private authService: AuthService,
+    private eventsService: EventsService
     ) {}
 
   ngOnInit(): void {
@@ -24,5 +28,8 @@ export class AppComponent implements OnInit {
     this.authService.autoLogin();
 
     this.themeService.loadTheme();
+    this.eventsService.loading$.subscribe((state) => {
+      this.loading = state;
+    })
   }
 }
