@@ -46,4 +46,4 @@ testem.log
 Thumbs.db
 
 /src/environments
-/backend/enviromnet.js
+/backend/environment

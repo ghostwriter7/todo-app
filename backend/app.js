@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const environment = require('./environment');
+const environment = require('./environment/environment');
 const userRoutes = require('./routes/user.routes');
 
 const app = express();
@@ -14,11 +14,6 @@ mongoose.connect(`mongodb+srv://ghostwriter7:${environment.DATABASE_PASSWORD}@cl
   .then(() => console.log('Connected!'))
   .catch((err) => console.error('Not connected!', err));
 
-app.get('/', (req, res, next) => {
-  return res.json('hello world');
-});
-
 app.use('/auth', userRoutes);
-
 
 app.listen(3000);
