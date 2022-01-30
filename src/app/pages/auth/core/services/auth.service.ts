@@ -70,7 +70,7 @@ export class AuthService {
         this.userSubject.next(this.user);
         this.initAutoLogout();
 
-        this.router.navigate(['/todo']).then(() => {
+        this.router.navigate(['/todo', 'calendar']).then(() => {
           this.notificationService.showNotification("Welcome back & good luck!", 'Success');
         });
       }

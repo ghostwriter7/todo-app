@@ -1,9 +1,14 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { TodoComponent } from './todo.component';
+import { TodoWrapperComponent } from './pages/todo-wrapper/todo-wrapper.component';
+import { CalendarComponent } from './pages/calendar/calendar.component';
 
 const routes: Routes = [
-  { path: '', component: TodoComponent }
+  { path: '', component: TodoComponent, children: [
+      { path: 'today', component: TodoWrapperComponent },
+      { path: 'calendar', component: CalendarComponent }
+    ] },
 ]
 
 @NgModule({

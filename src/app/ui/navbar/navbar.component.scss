@@ -7,16 +7,38 @@
   background-color: var(--bg-color);
   opacity: .9;
   padding-block: 1rem;
+
+  @media screen and (max-width: 500px) {
+    & {
+      padding-inline: 1rem;
+    }
+  }
 }
 
 .container {
   width: min(100%, 500px);
   margin-inline: auto;
 
-  .logout-btn {
-    margin-left: auto;
-    display: block;
+  a {
+    color: var(--color-accent);
 
+    &:not(:last-of-type) {
+      margin-right: 1rem;
+    }
+
+    &:hover {
+      color: var(--color-primary);
+    }
+
+    &.active {
+      background-image: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      pointer-events: none;
+    }
+  }
+
+  .logout-btn {
     font-family: inherit;
     text-transform: uppercase;
     background-color: transparent;

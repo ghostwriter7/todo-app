@@ -18,7 +18,7 @@ export const dark: Theme = {
     '--background-image-mobile': 'url("./assets/img/bg-mobile-dark.jpg")',
     '--toggle-theme-icon': 'url("./assets/img/icon-sun.svg")',
     '--toggle-theme-anim': 'rotate',
-    '--box-shadow': '-5px 10px 15px rgba(0,0,0,.4), 5px 10px 15px rgba(0,0,0,.4)'
+    '--box-shadow': '-5px 10px 15px rgba(0,0,0,.4), 5px 10px 15px rgba(0,0,0,.4)',
   }
 }
 
@@ -35,6 +35,6 @@ export const light: Theme = {
     '--background-image-mobile': 'url("./assets/img/bg-mobile-light.jpg")',
     '--toggle-theme-icon': 'url("./assets/img/icon-moon.svg")',
     '--toggle-theme-anim': 'grow',
-    '--box-shadow': '-2px 2px 7px rgba(236, 236, 236, .6), 2px 2px 7px rgba(236, 236, 236, .6)'
+    '--box-shadow': '-2px 2px 7px rgba(236, 236, 236, .6), 2px 2px 7px rgba(236, 236, 236, .6)',
   }
 }

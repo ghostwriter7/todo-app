@@ -1,0 +1,38 @@
+<div class="container">
+  <div class="header flex justify-around">
+    <div class="year-wrapper flex justify-between align-center">
+      <button
+        [disabled]="currentYear <= 2022"
+        (click)="onPrevYear()">-</button>
+      <span class="chosen-year">{{ currentYear }}</span>
+      <button (click)="onNextYear()">+</button>
+    </div>
+    <div class="month-wrapper flex">
+      <select [ngModel]="currentMonth" name="month" (change)="onMonthSelected($event)">
+        <option  *ngFor="let month of months; let i = index" [value]="i">{{ month }}</option>
+      </select>
+    </div>
+  </div>
+  <div class="content">
+    <div class="week-days flex justify-between">
+      <div class="label">Mon</div>
+      <div class="label">Tue</div>
+      <div class="label">Wed</div>
+      <div class="label">Thu</div>
+      <div class="label">Fri</div>
+      <div class="label">Sat</div>
+      <div class="label">Sun</div>
+    </div>
+    <div class="tiles-wrapper flex justify-between">
+      <span [style.flex-basis]="startingGap" ></span>
+      <div
+        *ngFor="let tile of calendarData"
+        [ngClass]="{ today: tile.isToday, past: tile.hasPassed }"
+        (click)="onSelectDate(tile.date!)"
+        class="tile">{{ tile.date }}</div>
+      <span
+        [style.flex-basis]="endingGap"
+        class="spacer-ending"></span>
+    </div>
+  </div>
+</div>
