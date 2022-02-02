@@ -76,7 +76,8 @@ export class TodoListComponent implements OnInit, OnDestroy {
     const droppedID = +(e as any).toElement.getAttribute('id');
     this.renderer.setStyle(todo, 'opacity', 1);
 
-    [this.mockup[draggedID], this.mockup[droppedID]] = [this.mockup[droppedID], this.mockup[draggedID]];
+    this.todoService.swapTodosOnList(draggedID, droppedID);
+    this.selectedTodoIdx = droppedID;
   }
 
   public onNextPage(): void {

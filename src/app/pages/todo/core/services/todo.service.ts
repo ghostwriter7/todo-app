@@ -70,6 +70,13 @@ export class TodoService {
     this.saveInLocalStorage();
   }
 
+  public swapTodosOnList(firstTodoID: number, secondTodoID: number): void {
+    [this.mockup[firstTodoID], this.mockup[secondTodoID]] = [this.mockup[secondTodoID], this.mockup[firstTodoID]];
+    this.getTodos(this.currentPage);
+
+    this.saveInLocalStorage();
+  }
+
   public toggleStatus(clickedTodo: ITodoItem, mode: string): void {
     const todo = this.mockup.find(item => item.content === clickedTodo.content)!;
 

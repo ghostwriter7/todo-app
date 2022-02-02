@@ -1,4 +1,4 @@
-<app-navbar *ngIf="showNavbar" @navbarAnimation></app-navbar>
+<app-navbar *ngIf="authService.user$ | async" @navbarAnimation></app-navbar>
 <div class="container flex col">
   <app-header></app-header>
   <router-outlet></router-outlet>
@@ -6,4 +6,4 @@
 
 <ng-template appPlaceholder></ng-template>
 
-<app-spinner *ngIf="loading"></app-spinner>
+<app-spinner *ngIf="eventsService.loading$ | async"></app-spinner>

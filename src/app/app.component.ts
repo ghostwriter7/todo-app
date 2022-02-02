@@ -1,4 +1,4 @@
-import { Component, ComponentFactoryResolver, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { PlaceholderDirective } from './core/directives';
 import { ThemeService } from '../theme/theme.service';
 import { NotificationService } from './core/services/notification.service';
@@ -31,15 +31,12 @@ import { animate, style, transition, trigger } from '@angular/animations';
 
 export class AppComponent implements OnInit {
   @ViewChild(PlaceholderDirective, {static: true}) alertHost!: PlaceholderDirective;
-  public showNavbar = false;
-  public loading = false;
 
   constructor(
-    private componentFactoryResolver: ComponentFactoryResolver,
     private themeService: ThemeService,
     private notificationService: NotificationService,
-    private authService: AuthService,
-    private eventsService: EventsService
+    public authService: AuthService,
+    public eventsService: EventsService
   ) {
   }
 
@@ -48,12 +45,5 @@ export class AppComponent implements OnInit {
     this.authService.autoLogin();
 
     this.themeService.loadTheme();
-    this.eventsService.loading$.subscribe((state) => {
-      this.loading = state;
-    });
-
-    this.authService.user$.subscribe((state) => {
-      this.showNavbar = !!state;
-    })
   }
 }

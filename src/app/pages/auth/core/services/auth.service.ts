@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, catchError, map, Observable, of, tap, throwError } from 'rxjs';
+import { BehaviorSubject, catchError, finalize, map, Observable, of, tap, throwError } from 'rxjs';
 import { IUser, IAuthResponse } from '../interfaces';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -32,7 +32,8 @@ export class AuthService {
     return this.http.post<IAuthResponse>(`${this.baseURL}/login`, { email, password })
     .pipe(
       tap(this.handleSuccess.bind(this)),
-      catchError(this.handleError.bind(this))
+      catchError(this.handleError.bind(this)),
+      finalize(() => this.eventsService.stopLoading())
     );
   }
 
@@ -42,7 +43,8 @@ export class AuthService {
     return this.http.post<IAuthResponse>(`${this.baseURL}/signup`, { email, password })
     .pipe(
       tap(this.handleSuccess.bind(this)),
-      catchError(this.handleError.bind(this))
+      catchError(this.handleError.bind(this)),
+      finalize(() => this.eventsService.stopLoading())
       );
   }
 
@@ -84,8 +86,6 @@ export class AuthService {
   }
 
   private handleSuccess({ email, id, token }: IAuthResponse): void {
-    this.eventsService.stopLoading();
-
     this.user = { email, id, token, expirationDate: new Date(Date.now() + 3600 * 1000)};
     this.userSubject.next(this.user);
 
@@ -95,8 +95,6 @@ export class AuthService {
   }
 
   private handleError({ error }: HttpErrorResponse): Observable<any> {
-    this.eventsService.stopLoading();
-
     this.notificationService.showNotification(error.error, 'Error');
     return throwError(() => new Error(error.error));
   }
