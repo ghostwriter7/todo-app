@@ -1,40 +1,34 @@
-import { AfterContentInit, Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
-import { ITodoItem } from '../../core/interfaces';
+import { AfterContentInit, Component, Renderer2 } from '@angular/core';
 import { TodoService } from '../../core/services/todo.service';
-import { combineLatest, Observable, Subscription, switchMap } from 'rxjs';
-import { ActivatedRoute, Params } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-todo-list',
   templateUrl: './todo-list.component.html',
   styleUrls: ['./todo-list.component.scss'],
 })
-export class TodoListComponent implements OnInit, AfterContentInit {
+export class TodoListComponent implements AfterContentInit {
   public selectedTodoIdx: number | null = null;
 
   constructor(
-    private renderer: Renderer2,
-    private route: ActivatedRoute,
+    private _renderer: Renderer2,
+    private _route: ActivatedRoute,
     public todoService: TodoService
   ) {}
 
-  ngOnInit(): void {
-
-  }
-
   ngAfterContentInit(): void  {
     setTimeout(() => {
-      const date = this.route.snapshot.params['date'];
+      const date = this._route.snapshot.params['date'];
       this.todoService.fetchTodos(date);
     }, 0);
   }
 
   public onDragEnter(todo: HTMLElement): void {
-    this.renderer.setStyle(todo, 'opacity', 0.5);
+    this._renderer.setStyle(todo, 'opacity', 0.5);
   }
 
   public onDragLeave(todo: HTMLElement): void {
-    this.renderer.setStyle(todo, 'opacity', 1);
+    this._renderer.setStyle(todo, 'opacity', 1);
   }
 
   public onDragStart(e: DragEvent): void {
@@ -51,7 +45,7 @@ export class TodoListComponent implements OnInit, AfterContentInit {
     e.preventDefault();
     const draggedID = +e.dataTransfer!.getData('initID');
     const droppedID = +(e as any).toElement.getAttribute('id');
-    this.renderer.setStyle(todo, 'opacity', 1);
+    this._renderer.setStyle(todo, 'opacity', 1);
 
     this.todoService.swapTodosOnList(draggedID, droppedID);
     this.selectedTodoIdx = droppedID;

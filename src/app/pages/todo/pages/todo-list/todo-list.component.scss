@@ -56,9 +56,12 @@ li {
   color: var(--color-text-primary);
   background-color: var(--bg-secondary-color);
   align-items: center;
-  cursor: pointer;
   border: 1px solid transparent;
   border-bottom-color: var(--color-border);
+
+  .text {
+    cursor: pointer;
+  }
 
   &.active {
     .circle {
@@ -88,6 +91,7 @@ li {
   margin-right: 10px;
   background: transparent;
   background-clip: padding-box;
+  cursor: pointer;
 }
 
 .checked {

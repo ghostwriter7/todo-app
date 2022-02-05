@@ -15,8 +15,9 @@ export class TodoService {
   private baseURL = 'http://localhost:3000/api/todo';
 
   private todosChanged = new ReplaySubject<ITodoItem[] | null>(1);
-  private errorEmitter = new Subject<string>();
   public todos$ = this.todosChanged.asObservable();
+
+  private errorEmitter = new Subject<string>();
   public error$ = this.errorEmitter.asObservable();
 
   private activeTodosSubject = new Subject<number>();
@@ -35,6 +36,9 @@ export class TodoService {
   private showPrevButtonSubject = new BehaviorSubject<boolean>(false);
   public showPrevButton$ = this.showPrevButtonSubject.asObservable();
 
+  private dateSubject = new BehaviorSubject<Date>(new Date());
+  public date$ = this.dateSubject.asObservable();
+
   private mode!: 'NEW_TODOS' | 'EDIT_TODOS';
   private date!: string;
   private doc: ITodoResponse = {
@@ -45,8 +49,7 @@ export class TodoService {
   };
 
   constructor(
-    private storageService: StorageService,
-    private http: HttpClient,
+    private _http: HttpClient,
     private _notificationService: NotificationService,
     private _eventService: EventsService
   ) {}
@@ -126,6 +129,8 @@ export class TodoService {
     [this.doc.todos[firstTodoID], this.doc.todos[secondTodoID]] =
       [this.doc.todos[secondTodoID], this.doc.todos[firstTodoID]];
 
+    this.updateTodos();
+    this.filterTodos();
   }
 
   public toggleStatus(clickedTodo: ITodoItem): void {
@@ -146,9 +151,7 @@ export class TodoService {
     this.checkButtons();
   }
 
-  public addTodo(todo: string, date: string): void {
-    this.date = date;
-
+  public addTodo(todo: string): void {
     if (this.doc.todos.find(item => item.content === todo)) {
       this.errorEmitter.next('Such a Todo already exists!');
       return;
@@ -162,11 +165,18 @@ export class TodoService {
     this.checkButtons();
   }
 
+  private initDate(date: string): void {
+    this.date = date;
+    const segments = date.split('-');
+
+    this.dateSubject.next(new Date(+segments[2], +segments[1] - 1, +segments[0]));
+  }
+
   public fetchTodos(date: string): void {
     this._eventService.startLoading();
-    this.date = date;
+    this.initDate(date);
 
-    this.http.get<{ doc: ITodoResponse }>(`${this.baseURL}/${date}`)
+    this._http.get<{ doc: ITodoResponse }>(`${this.baseURL}/${date}`)
     .subscribe({
       next: (res) => {
         this.mode = 'EDIT_TODOS';
@@ -186,6 +196,7 @@ export class TodoService {
         };
 
         this._eventService.stopLoading();
+        this.filterTodos();
         this._notificationService.showNotification(err.error.message, 'Info');
         this.mode = 'NEW_TODOS';
       }
@@ -193,7 +204,7 @@ export class TodoService {
   }
 
   private updateTodos(): void {
-    this.http.put<{ message: string }>(`${this.baseURL}/${this.date}`, this.doc)
+    this._http.put<{ message: string }>(`${this.baseURL}/${this.date}`, this.doc)
     .subscribe({
       next: (res) => {
         this.mode = 'EDIT_TODOS';
@@ -206,7 +217,7 @@ export class TodoService {
   }
 
   private saveTodos(): void {
-    this.http.post<{ doc: ITodoResponse}>(`${this.baseURL}/${this.date}`, this.doc.todos)
+    this._http.post<{ doc: ITodoResponse}>(`${this.baseURL}/${this.date}`, this.doc.todos)
     .subscribe({
       next: (res) => {
         this.mode = 'EDIT_TODOS';
@@ -219,6 +230,6 @@ export class TodoService {
   }
 
   private deleteTodoDoc(): void {
-    this.http.delete(`${this.baseURL}/${this.date}`).subscribe();
+    this._http.delete(`${this.baseURL}/${this.date}`).subscribe();
   }
 }
