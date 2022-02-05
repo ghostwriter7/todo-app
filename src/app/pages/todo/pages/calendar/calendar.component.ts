@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-calendar',
@@ -20,6 +21,9 @@ export class CalendarComponent implements OnInit {
   public endingGap!: string;
 
   public calendarData: { date: number, isToday: boolean, hasPassed: boolean }[] = [];
+
+  constructor(
+    private router: Router) {}
 
   ngOnInit(): void {
     this.renderCalendar();
@@ -69,8 +73,7 @@ export class CalendarComponent implements OnInit {
   }
 
   onSelectDate(date: number): void {
-    const selectedDay = new Date(this.currentYear, this.currentMonth, date);
-
-    console.log(selectedDay);
+    const path = `${date.toString().padStart(2, '0')}-${(this.currentMonth + 1).toString().padStart(2, '0')}-${this.currentYear}`;
+    this.router.navigate(['/todo', path]);
   }
 }

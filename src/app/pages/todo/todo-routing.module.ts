@@ -6,8 +6,8 @@ import { CalendarComponent } from './pages/calendar/calendar.component';
 
 const routes: Routes = [
   { path: '', component: TodoComponent, children: [
-      { path: 'today', component: TodoWrapperComponent },
-      { path: 'calendar', component: CalendarComponent }
+      { path: 'calendar', component: CalendarComponent },
+      { path: ':date', component: TodoWrapperComponent }
     ] },
 ]
 

@@ -13,8 +13,6 @@ export class TodoComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.todosService.loadTodosFromStorage();
-
     this.todosService.error$.subscribe((error) => {
       this.notificationService.showNotification(error, 'Error');
     });

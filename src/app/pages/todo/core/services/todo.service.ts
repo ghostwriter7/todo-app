@@ -1,121 +1,224 @@
-import { Injectable, ViewChild } from '@angular/core';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { ITodoItem } from '../interfaces';
+import { Injectable, OnInit, ViewChild } from '@angular/core';
+import { BehaviorSubject, combineLatest, ReplaySubject, Subject, take } from 'rxjs';
+import { ITodoItem, ITodoResponse } from '../interfaces';
 import { PlaceholderDirective } from '../../../../core/directives/';
 import { StorageService } from '../../../../core/services/storage.service';
+import { HttpClient } from '@angular/common/http';
+import { NotificationService } from '../../../../core/services/notification.service';
+import { EventsService } from '../../../../core/services/events.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TodoService {
   @ViewChild(PlaceholderDirective) alertHost!: PlaceholderDirective;
-  public mockup: ITodoItem[] = [];
+  private baseURL = 'http://localhost:3000/api/todo';
 
-  private todosChanged = new BehaviorSubject<ITodoItem[]>(this.mockup);
+  private todosChanged = new ReplaySubject<ITodoItem[] | null>(1);
   private errorEmitter = new Subject<string>();
   public todos$ = this.todosChanged.asObservable();
   public error$ = this.errorEmitter.asObservable();
 
+  private activeTodosSubject = new Subject<number>();
+  public activeTodos$ = this.activeTodosSubject.asObservable();
+
+  private filteringModeSubject = new BehaviorSubject<string>('All');
+  public filteringMode$ = this.filteringModeSubject.asObservable();
+
   private currentPage = 0;
+  private currentPageSubject = new BehaviorSubject<number>(this.currentPage);
+  public currentPage$ = this.currentPageSubject.asObservable();
 
-  get completed(): number {
-    return this.mockup.filter(todo => !todo.isActive).length;
+  private showNextButtonSubject = new BehaviorSubject<boolean>(false);
+  public showNextButton$ = this.showNextButtonSubject.asObservable();
+
+  private showPrevButtonSubject = new BehaviorSubject<boolean>(false);
+  public showPrevButton$ = this.showPrevButtonSubject.asObservable();
+
+  private mode!: 'NEW_TODOS' | 'EDIT_TODOS';
+  private date!: string;
+  private doc: ITodoResponse = {
+    creator: '',
+    _id: '',
+    date: '',
+    todos: []
+  };
+
+  constructor(
+    private storageService: StorageService,
+    private http: HttpClient,
+    private _notificationService: NotificationService,
+    private _eventService: EventsService
+  ) {}
+
+  private checkButtons(): void {
+    combineLatest(
+      this.currentPage$,
+      this.todos$
+    ).pipe(take(1))
+    .subscribe(([index, todos]) => {
+      const isNextPage = todos ? (index + 1) * 5 < todos.length : false;
+      const isPrevPage = todos ? index * 5 > 0 : false;
+
+      this.showNextButtonSubject.next(isNextPage);
+      this.showPrevButtonSubject.next(isPrevPage);
+    });
   }
 
-  constructor(private storageService: StorageService) {}
-
-  public getTodos(pageIndex: number, mode?: string) {
-    this.currentPage = pageIndex;
-
-    const curTodos = this.mockup.filter(todo => {
-      if (mode) {
-        switch (mode) {
-          case 'Active':
-            return todo.isActive;
-          case 'Completed':
-            return !todo.isActive;
-          default:
-            return todo;
-        }
-      } else {
-        return todo;
-      }
-    }).slice(pageIndex * 5, pageIndex * 5 + 5);
-
-    this.todosChanged.next(curTodos);
+  public switchMode(mode: string): void {
+    this.filteringModeSubject.next(mode);
+    this.filterTodos();
+    this.currentPageSubject.next(0);
+    this.checkButtons();
   }
 
-  public countLeftTodos(): number {
-    return this.mockup.filter(todo => todo.isActive).length;
+  public showNextPage(): void {
+   this.currentPage++;
+   this.currentPageSubject.next(this.currentPage);
+   this.checkButtons();
   }
 
-  public countTodosForBtn(mode: string): number {
-    switch (mode) {
-      case 'Active': {
-        return this.countLeftTodos();
-      }
-      case 'Completed': {
-        return this.mockup.filter(todo => !todo.isActive).length;
-      }
-      default: {
-        return this.mockup.length;
-      }
+  public showPrevPage(): void {
+    this.currentPage--;
+    this.currentPageSubject.next(this.currentPage);
+    this.checkButtons();
+  }
+
+  public enableClearCompleted(): boolean {
+    if (!this.doc.todos) {
+      return false;
     }
+
+    const completedTodos = this.doc.todos.filter(todo => !todo.isActive);
+    return !!completedTodos.length;
+  }
+
+  public filterTodos(): void {
+    const filteredTodos = this.doc.todos.filter(todo => {
+      switch (this.filteringModeSubject.getValue()) {
+        case 'Active':
+          return todo.isActive;
+        case 'Completed':
+          return !todo.isActive;
+        default:
+          return todo;
+      }
+    });
+
+    filteredTodos.length ? this.todosChanged.next(filteredTodos) : this.todosChanged.next(null);
+  }
+
+  public countActiveTodos() {
+    this.activeTodosSubject.next(this.doc.todos.filter(todo => todo.isActive).length);
   }
 
   public deleteTodo(todo: ITodoItem): void {
-    this.mockup = this.mockup.filter(item => item.content !== todo.content);
-    this.getTodos(this.currentPage);
+    this.doc.todos = this.doc.todos.filter(item => item.content !== todo.content);
 
-    this.saveInLocalStorage();
+    this.doc.todos.length ? this.updateTodos() : this.deleteTodoDoc();
+
+    this.filterTodos();
+    this.countActiveTodos();
+    this.checkButtons();
   }
 
   public swapTodosOnList(firstTodoID: number, secondTodoID: number): void {
-    [this.mockup[firstTodoID], this.mockup[secondTodoID]] = [this.mockup[secondTodoID], this.mockup[firstTodoID]];
-    this.getTodos(this.currentPage);
+    [this.doc.todos[firstTodoID], this.doc.todos[secondTodoID]] =
+      [this.doc.todos[secondTodoID], this.doc.todos[firstTodoID]];
 
-    this.saveInLocalStorage();
   }
 
-  public toggleStatus(clickedTodo: ITodoItem, mode: string): void {
-    const todo = this.mockup.find(item => item.content === clickedTodo.content)!;
+  public toggleStatus(clickedTodo: ITodoItem): void {
+    const todo = this.doc.todos.find(item => item.content === clickedTodo.content)!;
 
     todo.isActive = !todo.isActive;
 
-    this.getTodos(this.currentPage, mode);
-
-    this.saveInLocalStorage();
+    this.filterTodos();
+    this.updateTodos();
+    this.countActiveTodos();
+    this.checkButtons();
   }
 
   public clearCompleted(): void {
-    this.mockup = this.mockup.filter(todo => todo.isActive);
-    this.getTodos(this.currentPage);
-
-    this.saveInLocalStorage();
+    this.doc.todos = this.doc.todos.filter(todo => todo.isActive);
+    this.filterTodos();
+    this.updateTodos();
+    this.checkButtons();
   }
 
-  public addTodo(todo: string): void {
-    if (this.mockup.find(item => item.content === todo)) {
+  public addTodo(todo: string, date: string): void {
+    this.date = date;
+
+    if (this.doc.todos.find(item => item.content === todo)) {
       this.errorEmitter.next('Such a Todo already exists!');
       return;
     }
 
-    this.mockup.unshift({ content: todo, isActive: true });
-    this.getTodos(this.currentPage);
+    this.doc.todos.unshift({ content: todo, isActive: true });
 
-    this.saveInLocalStorage();
+    this.mode === 'NEW_TODOS' ? this.saveTodos() : this.updateTodos();
+    this.filterTodos();
+    this.countActiveTodos();
+    this.checkButtons();
   }
 
-  public saveInLocalStorage(): void {
-    this.storageService.saveItem('todos', this.mockup);
+  public fetchTodos(date: string): void {
+    this._eventService.startLoading();
+    this.date = date;
+
+    this.http.get<{ doc: ITodoResponse }>(`${this.baseURL}/${date}`)
+    .subscribe({
+      next: (res) => {
+        this.mode = 'EDIT_TODOS';
+        this.doc = res.doc;
+        this._eventService.stopLoading();
+
+        this.filterTodos();
+        this.countActiveTodos();
+        this.checkButtons();
+      },
+      error: (err) => {
+        this.doc = {
+          _id: '',
+          creator: '',
+          todos: [],
+          date: this.date
+        };
+
+        this._eventService.stopLoading();
+        this._notificationService.showNotification(err.error.message, 'Info');
+        this.mode = 'NEW_TODOS';
+      }
+    });
   }
 
-  public loadTodosFromStorage(): void {
-    const todos = this.storageService.getItem('todos');
+  private updateTodos(): void {
+    this.http.put<{ message: string }>(`${this.baseURL}/${this.date}`, this.doc)
+    .subscribe({
+      next: (res) => {
+        this.mode = 'EDIT_TODOS';
+        this._notificationService.showNotification(res.message, 'Success');
+      },
+      error: (err) => {
+        this._notificationService.showNotification(err.error.message, 'Error');
+      }
+    });
+  }
 
-    if (todos) {
-      this.mockup = this.storageService.parseItem(todos);
-      this.getTodos(this.currentPage);
-    }
+  private saveTodos(): void {
+    this.http.post<{ doc: ITodoResponse}>(`${this.baseURL}/${this.date}`, this.doc.todos)
+    .subscribe({
+      next: (res) => {
+        this.mode = 'EDIT_TODOS';
+        this.doc = res.doc;
+      },
+      error: (err) => {
+        this._notificationService.showNotification(err.error.message, 'Error');
+      }
+    });
+  }
+
+  private deleteTodoDoc(): void {
+    this.http.delete(`${this.baseURL}/${this.date}`).subscribe();
   }
 }

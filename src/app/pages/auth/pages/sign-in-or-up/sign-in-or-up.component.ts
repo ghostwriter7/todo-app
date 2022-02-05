@@ -46,7 +46,12 @@ export class SignInOrUpComponent implements OnInit {
 
       obs$.subscribe({
         next: () => {
-          this.router.navigate(['/todo', 'today']);
+          const today = new Date();
+          const date = today.getDate().toString().padStart(2, '0');
+          const month = (today.getMonth() + 1).toString().padStart(2, '0');
+          const path = `${date}-${month}-${today.getFullYear()}`;
+
+          this.router.navigate(['/todo', path]);
           const message = this.mode === 'Login' ? "You've logged in successfully!" : "You've signed up successfully!";
 
           this.notificationService.showNotification(message, 'Success');

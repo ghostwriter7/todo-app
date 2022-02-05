@@ -1,9 +1,10 @@
 <div class="container">
-  <ul [ngClass]="{empty: !anyTodosOnList}">
+  <ul [ngClass]="{empty: !(todoService.todos$ | async)}">
+    <ng-container *ngFor="let item of todoService.todos$ | async; let i = index">
     <li
       [id]="i"
       #ref
-      [draggable]="filteringMode === 'All'"
+      [draggable]="(todoService.filteringMode$ | async) === 'All'"
       (dragstart)="onDragStart($event)"
       (dragover)="onDragOver($event)"
       (dragenter)="onDragEnter(ref)"
@@ -12,54 +13,57 @@
       [ngClass]="{ active: selectedTodoIdx === i }"
       (mouseenter)="selectedTodoIdx = i;"
       (mouseleave)="selectedTodoIdx = null"
-      (click)="onToggleStatus(item)"
-      *ngFor="let item of mockup; let i = index"
+      *ngIf="i >= (todoService.currentPage$ | async)! * 5
+      && i < ((todoService.currentPage$ | async)! + 1) * 5"
       class="flex">
       <span
+        (click)="todoService.toggleStatus(item)"
         [ngClass]="{ checked: !item.isActive }"
         class="circle">
       </span>
       <span
+        (click)="todoService.toggleStatus(item)"
         [ngClass]="{ completed: !item.isActive }"
         class="text">{{ item.content }}</span>
       <span class="spacer"></span>
       <button
         class="delete-btn"
         *ngIf="selectedTodoIdx === i"
-        (click)="onDelete(item)">
+        (click)="todoService.deleteTodo(item)">
       </button>
     </li>
+    </ng-container>
   </ul>
   <div class="filter-container flex row">
-    <span class="items-left">{{ todosLeft }} items left</span>
+    <span class="items-left">{{ todoService.activeTodos$ | async }} items left</span>
     <div>
       <button
-        (click)="onChangeMode('All')"
-        [ngClass]="{ active: filteringMode === 'All' }">All
+        (click)="todoService.switchMode('All')"
+        [ngClass]="{ active: (todoService.filteringMode$ | async)  === 'All' }">All
       </button>
       <button
-        (click)="onChangeMode('Active')"
-        [ngClass]="{ active: filteringMode === 'Active' }">Active
+        (click)="todoService.switchMode('Active')"
+        [ngClass]="{ active: (todoService.filteringMode$ | async) === 'Active' }">Active
       </button>
       <button
-        (click)="onChangeMode('Completed')"
-        [ngClass]="{ active: filteringMode === 'Completed' }">Completed
+        (click)="todoService.switchMode('Completed')"
+        [ngClass]="{ active: (todoService.filteringMode$ | async) === 'Completed' }">Completed
       </button>
     </div>
     <button
-      [disabled]="!todoService.completed"
-      (click)="onClearCompleted()">Clear Completed</button>
+      [disabled]="!todoService.enableClearCompleted()"
+      (click)="todoService.clearCompleted()">Clear Completed</button>
   </div>
 </div>
 <div class="todo-footer">
   <button
-    (click)="onPrevPage()"
-    [ngClass]="{ disabled: !(currentPageLength() > 5 && currentPage >= 1) }"
+    (click)="todoService.showPrevPage()"
+    [ngClass]="{ disabled: !(todoService.showPrevButton$ | async) }"
     class="btn btn-prev">PREV</button>
   <p class="drag-info">Drag and drop to reorder list</p>
   <button
-    (click)="onNextPage()"
-    [ngClass]="{ disabled: !((currentPage + 1) * 5 < currentPageLength()) }"
+    (click)="todoService.showNextPage()"
+    [ngClass]="{ disabled: !(todoService.showNextButton$ | async) }"
     class="btn btn-next">NEXT</button>
 </div>
 

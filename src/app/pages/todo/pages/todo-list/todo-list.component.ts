@@ -1,55 +1,32 @@
-import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
+import { AfterContentInit, Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { ITodoItem } from '../../core/interfaces';
 import { TodoService } from '../../core/services/todo.service';
-import { Subscription } from 'rxjs';
+import { combineLatest, Observable, Subscription, switchMap } from 'rxjs';
+import { ActivatedRoute, Params } from '@angular/router';
 
 @Component({
   selector: 'app-todo-list',
   templateUrl: './todo-list.component.html',
   styleUrls: ['./todo-list.component.scss'],
 })
-export class TodoListComponent implements OnInit, OnDestroy {
+export class TodoListComponent implements OnInit, AfterContentInit {
   public selectedTodoIdx: number | null = null;
-  public filteringMode = 'All';
-  public todosLeft?: number;
-  public currentPage = 0;
-  public anyTodosOnList?: boolean;
-  public mockup: ITodoItem[] = [];
-
-  private todosSub!: Subscription;
 
   constructor(
     private renderer: Renderer2,
+    private route: ActivatedRoute,
     public todoService: TodoService
   ) {}
 
   ngOnInit(): void {
-    this.todosSub = this.todoService.todos$.subscribe(todos => {
-      this.mockup = todos;
 
-      this.anyTodosOnList = !!this.mockup.length;
-      this.todosLeft = this.todoService.countLeftTodos();
-    });
-
-    this.todoService.getTodos(this.currentPage);
   }
 
-  public onDelete(item: ITodoItem): void {
-    this.todoService.deleteTodo(item);
-  }
-
-  public onToggleStatus(clickedTodo: ITodoItem): void {
-    this.todoService.toggleStatus(clickedTodo, this.filteringMode);
-  }
-
-  public onClearCompleted(): void {
-    this.filteringMode = 'All';
-    this.todoService.clearCompleted();
-  }
-
-  public onChangeMode(mode: string) {
-    this.filteringMode = mode;
-    this.todoService.getTodos(this.currentPage, mode);
+  ngAfterContentInit(): void  {
+    setTimeout(() => {
+      const date = this.route.snapshot.params['date'];
+      this.todoService.fetchTodos(date);
+    }, 0);
   }
 
   public onDragEnter(todo: HTMLElement): void {
@@ -78,23 +55,5 @@ export class TodoListComponent implements OnInit, OnDestroy {
 
     this.todoService.swapTodosOnList(draggedID, droppedID);
     this.selectedTodoIdx = droppedID;
-  }
-
-  public onNextPage(): void {
-    this.currentPage++;
-    this.todoService.getTodos(this.currentPage, this.filteringMode);
-  }
-
-  public onPrevPage(): void {
-    this.currentPage--;
-    this.todoService.getTodos(this.currentPage, this.filteringMode);
-  }
-
-  public currentPageLength(): number {
-    return this.todoService.countTodosForBtn(this.filteringMode);
-  }
-
-  ngOnDestroy(): void {
-    this.todosSub.unsubscribe();
   }
 }
