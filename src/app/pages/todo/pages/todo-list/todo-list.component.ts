@@ -1,6 +1,6 @@
 import { AfterContentInit, Component, Renderer2 } from '@angular/core';
 import { TodoService } from '../../core/services/todo.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Params } from '@angular/router';
 
 @Component({
   selector: 'app-todo-list',
@@ -18,8 +18,10 @@ export class TodoListComponent implements AfterContentInit {
 
   ngAfterContentInit(): void  {
     setTimeout(() => {
-      const date = this._route.snapshot.params['date'];
-      this.todoService.fetchTodos(date);
+      this._route.params.subscribe((params: Params) => {
+        const date = params['date'];
+        this.todoService.fetchTodos(date);
+      });
     }, 0);
   }
 

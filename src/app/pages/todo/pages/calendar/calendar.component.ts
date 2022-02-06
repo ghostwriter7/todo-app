@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { CalendarService } from '../../core/services/calendar.service';
 
 @Component({
   selector: 'app-calendar',
@@ -23,7 +24,9 @@ export class CalendarComponent implements OnInit {
   public calendarData: { date: number, isToday: boolean, hasPassed: boolean }[] = [];
 
   constructor(
-    private router: Router) {}
+    private router: Router,
+    private _calendarService: CalendarService
+  ) {}
 
   ngOnInit(): void {
     this.renderCalendar();
@@ -45,6 +48,7 @@ export class CalendarComponent implements OnInit {
   }
 
   public renderCalendar(): void {
+    this._calendarService.getMonthData(this.currentYear, (this.currentMonth + 1).toString().padStart(2, '0'));
     const today = new Date();
 
     this.numberOfDays = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();

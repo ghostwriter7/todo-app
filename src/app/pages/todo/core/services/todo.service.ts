@@ -12,7 +12,7 @@ import { EventsService } from '../../../../core/services/events.service';
 })
 export class TodoService {
   @ViewChild(PlaceholderDirective) alertHost!: PlaceholderDirective;
-  private baseURL = 'http://localhost:3000/api/todo';
+  private baseURL = 'http://18.159.52.1:3000/api/todo';
 
   private todosChanged = new ReplaySubject<ITodoItem[] | null>(1);
   public todos$ = this.todosChanged.asObservable();
@@ -230,6 +230,10 @@ export class TodoService {
   }
 
   private deleteTodoDoc(): void {
-    this._http.delete(`${this.baseURL}/${this.date}`).subscribe();
+    this._http.delete(`${this.baseURL}/${this.date}`).subscribe({
+      next: () => {
+        this.mode = 'NEW_TODOS';
+      }
+    });
   }
 }
