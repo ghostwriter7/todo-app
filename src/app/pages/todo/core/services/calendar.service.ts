@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root'
 })
 export class CalendarService {
-  private _baseURL = 'http://18.159.52.1:3000/api/calendar';
+  private _baseURL = 'https://18.159.52.1:3000/api/calendar';
 
   constructor(
     private _http: HttpClient

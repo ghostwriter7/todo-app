@@ -12,7 +12,7 @@ import { EventsService } from '../../../../core/services/events.service';
 })
 export class TodoService {
   @ViewChild(PlaceholderDirective) alertHost!: PlaceholderDirective;
-  private baseURL = 'http://18.159.52.1:3000/api/todo';
+  private baseURL = 'https://18.159.52.1:3000/api/todo';
 
   private todosChanged = new ReplaySubject<ITodoItem[] | null>(1);
   public todos$ = this.todosChanged.asObservable();

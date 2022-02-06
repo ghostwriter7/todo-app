@@ -11,7 +11,7 @@ import { EventsService } from '../../../../core/services/events.service';
   providedIn: 'root'
 })
 export class AuthService {
-  private baseURL = 'http://18.159.52.1:3000/api/auth';
+  private baseURL = 'https://18.159.52.1:3000/api/auth';
   private user: IUser | null = null;
   private userSubject = new BehaviorSubject<IUser | null>(this.user);
   private timer: any;
