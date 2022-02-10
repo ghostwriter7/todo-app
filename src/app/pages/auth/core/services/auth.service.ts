@@ -1,11 +1,16 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, catchError, finalize, map, Observable, of, tap, throwError } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { IUser, IAuthResponse } from '../interfaces';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { StorageService } from '../../../../core/services/storage.service';
 import { Router } from '@angular/router';
 import { EventsService } from '../../../../core/services/events.service';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, Auth } from 'firebase/auth';
+import { app } from '../../../../core/libs/firebase';
+import firebase from 'firebase/compat';
+import UserCredential = firebase.auth.UserCredential;
+
 
 @Injectable({
   providedIn: 'root'
@@ -13,8 +18,9 @@ import { EventsService } from '../../../../core/services/events.service';
 export class AuthService {
   private baseURL = 'https://todo-app-api-pb8f2a9vn-ghostwriter7.vercel.app/api/auth';
   private user: IUser | null = null;
-  private userSubject = new BehaviorSubject<IUser | null>(this.user);
+  public userSubject = new BehaviorSubject<IUser | null>(this.user);
   private timer: any;
+  private readonly auth!: Auth;
 
   public user$ = this.userSubject.asObservable();
 
@@ -24,40 +30,41 @@ export class AuthService {
     private storageService: StorageService,
     private router: Router,
     private eventsService: EventsService
-  ) {}
-
-  public login(email: string, password: string): Observable<any> {
-    this.eventsService.startLoading();
-
-    return this.http.post<IAuthResponse>(`${this.baseURL}/login`, { email, password })
-    .pipe(
-      tap(this.handleSuccess.bind(this)),
-      catchError(this.handleError.bind(this)),
-      finalize(() => this.eventsService.stopLoading())
-    );
+  ) {
+    this.auth = getAuth(app);
   }
 
-  public signup(email: string, password: string): Observable<any> {
+  public login(email: string, password: string) {
     this.eventsService.startLoading();
 
-    return this.http.post<IAuthResponse>(`${this.baseURL}/signup`, { email, password })
-    .pipe(
-      tap(this.handleSuccess.bind(this)),
-      catchError(this.handleError.bind(this)),
-      finalize(() => this.eventsService.stopLoading())
-      );
+    signInWithEmailAndPassword(this.auth, email, password)
+      .then(this.handleSuccess.bind(this))
+      .catch(this.handleError.bind(this))
+      .finally(() => this.eventsService.stopLoading());
+  }
+
+  public signup(email: string, password: string) {
+    this.eventsService.startLoading();
+
+    createUserWithEmailAndPassword(this.auth, email, password)
+      .then(this.handleSuccess.bind(this))
+      .catch(this.handleError.bind(this))
+      .finally(() => this.eventsService.stopLoading())
+
   }
 
   public logout(): void {
-    this.user = null;
-    this.userSubject.next(null);
-    this.storageService.deleteItem('auth');
-
-    if (this.timer) {
-      clearTimeout(this.timer);
-    }
-
-    this.router.navigate(['/auth/login']);
+    signOut(this.auth)
+    .then(() => {
+      this.user = null;
+      this.userSubject.next(null);
+      this.storageService.deleteItem('auth');
+      this.router.navigate(['/auth/login']);
+      if (this.timer) {
+        clearTimeout(this.timer);
+      }
+    })
+    .catch(this.handleError.bind(this));
   }
 
   public autoLogin(): void {
@@ -85,17 +92,44 @@ export class AuthService {
     this.timer = setTimeout(() => this.logout(), timeLeft);
   }
 
-  private handleSuccess({ email, id, token }: IAuthResponse): void {
-    this.user = { email, id, token, expirationDate: new Date(Date.now() + 3600 * 1000)};
+  private handleSuccess(data: any): void {
+    this.user = {
+      email: data._tokenResponse.email,
+      id: data._tokenResponse.localId,
+      token: data._tokenResponse.idToken,
+      expirationDate: new Date(Date.now() + data._tokenResponse.expiresIn * 1000)
+    };
     this.userSubject.next(this.user);
+
+    this.router.navigate(['/todo/calendar']);
 
     this.storageService.saveItem('auth', this.user);
 
     this.initAutoLogout();
   }
 
-  private handleError({ error }: HttpErrorResponse): Observable<any> {
-    this.notificationService.showNotification(error.error, 'Error');
-    return throwError(() => new Error(error.error));
+  private handleError(error: any) {
+    let message = '';
+
+    switch (error.code) {
+      case 'auth/wrong-password': {
+        message = 'Invalid credentials!';
+        break;
+      }
+      case 'auth/user-not-found': {
+        message = 'There is no such account!';
+        break;
+      }
+      case 'auth/email-already-in-use': {
+        message = 'This e-mail is already registered!';
+        break;
+      }
+      default: {
+        message = 'Ops! Something went wrong!';
+        break;
+      }
+    }
+
+    this.notificationService.showNotification(message, 'Error');
   }
 }

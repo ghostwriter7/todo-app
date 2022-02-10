@@ -1,19 +1,19 @@
-import { Injectable, OnInit, ViewChild } from '@angular/core';
-import { BehaviorSubject, combineLatest, ReplaySubject, Subject, take } from 'rxjs';
-import { ITodoItem, ITodoResponse } from '../interfaces';
+import { Injectable, ViewChild } from '@angular/core';
+import { BehaviorSubject, combineLatest, finalize, from, ReplaySubject, Subject, switchMap, take } from 'rxjs';
+import { ITodoItem } from '../interfaces';
 import { PlaceholderDirective } from '../../../../core/directives/';
-import { StorageService } from '../../../../core/services/storage.service';
 import { HttpClient } from '@angular/common/http';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { EventsService } from '../../../../core/services/events.service';
+import { getFirestore, Firestore, collection, addDoc, getDocs, query, where, DocumentReference, DocumentData, setDoc, deleteDoc } from 'firebase/firestore';
+import { app } from '../../../../core/libs/firebase';
+import { AuthService } from '../../../auth/core/services/auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TodoService {
   @ViewChild(PlaceholderDirective) alertHost!: PlaceholderDirective;
-  private baseURL = 'https://todo-app-api-pb8f2a9vn-ghostwriter7.vercel.app/api/todo';
-
   private todosChanged = new ReplaySubject<ITodoItem[] | null>(1);
   public todos$ = this.todosChanged.asObservable();
 
@@ -41,18 +41,20 @@ export class TodoService {
 
   private mode!: 'NEW_TODOS' | 'EDIT_TODOS';
   private date!: string;
-  private doc: ITodoResponse = {
-    creator: '',
-    _id: '',
-    date: '',
-    todos: []
-  };
+  private docId?: string;
+  private docRef?: DocumentReference;
+  private todos: ITodoItem[] = [];
+
+  private readonly db: Firestore;
 
   constructor(
     private _http: HttpClient,
     private _notificationService: NotificationService,
-    private _eventService: EventsService
-  ) {}
+    private _eventService: EventsService,
+    private _authService: AuthService
+  ) {
+    this.db = getFirestore(app);
+  }
 
   private checkButtons(): void {
     combineLatest(
@@ -88,16 +90,16 @@ export class TodoService {
   }
 
   public enableClearCompleted(): boolean {
-    if (!this.doc.todos) {
+    if (!this.todos) {
       return false;
     }
 
-    const completedTodos = this.doc.todos.filter(todo => !todo.isActive);
+    const completedTodos = this.todos.filter(todo => !todo.isActive);
     return !!completedTodos.length;
   }
 
   public filterTodos(): void {
-    const filteredTodos = this.doc.todos.filter(todo => {
+    const filteredTodos = this.todos.filter(todo => {
       switch (this.filteringModeSubject.getValue()) {
         case 'Active':
           return todo.isActive;
@@ -112,13 +114,13 @@ export class TodoService {
   }
 
   public countActiveTodos() {
-    this.activeTodosSubject.next(this.doc.todos.filter(todo => todo.isActive).length);
+    this.activeTodosSubject.next(this.todos.filter(todo => todo.isActive).length);
   }
 
   public deleteTodo(todo: ITodoItem): void {
-    this.doc.todos = this.doc.todos.filter(item => item.content !== todo.content);
+    this.todos = this.todos.filter(item => item.content !== todo.content);
 
-    this.doc.todos.length ? this.updateTodos() : this.deleteTodoDoc();
+    this.todos.length ? this.updateTodos() : this.deleteTodoDoc();
 
     this.filterTodos();
     this.countActiveTodos();
@@ -126,15 +128,15 @@ export class TodoService {
   }
 
   public swapTodosOnList(firstTodoID: number, secondTodoID: number): void {
-    [this.doc.todos[firstTodoID], this.doc.todos[secondTodoID]] =
-      [this.doc.todos[secondTodoID], this.doc.todos[firstTodoID]];
+    [this.todos[firstTodoID], this.todos[secondTodoID]] =
+      [this.todos[secondTodoID], this.todos[firstTodoID]];
 
     this.updateTodos();
     this.filterTodos();
   }
 
   public toggleStatus(clickedTodo: ITodoItem): void {
-    const todo = this.doc.todos.find(item => item.content === clickedTodo.content)!;
+    const todo = this.todos.find(item => item.content === clickedTodo.content)!;
 
     todo.isActive = !todo.isActive;
 
@@ -145,19 +147,19 @@ export class TodoService {
   }
 
   public clearCompleted(): void {
-    this.doc.todos = this.doc.todos.filter(todo => todo.isActive);
+    this.todos = this.todos.filter(todo => todo.isActive);
     this.filterTodos();
     this.updateTodos();
     this.checkButtons();
   }
 
   public addTodo(todo: string): void {
-    if (this.doc.todos.find(item => item.content === todo)) {
+    if (this.todos.find(item => item.content === todo)) {
       this.errorEmitter.next('Such a Todo already exists!');
       return;
     }
 
-    this.doc.todos.unshift({ content: todo, isActive: true });
+    this.todos.unshift({ content: todo, isActive: true });
 
     this.mode === 'NEW_TODOS' ? this.saveTodos() : this.updateTodos();
     this.filterTodos();
@@ -176,64 +178,74 @@ export class TodoService {
     this._eventService.startLoading();
     this.initDate(date);
 
-    this._http.get<{ doc: ITodoResponse }>(`${this.baseURL}/${date}`)
-    .subscribe({
-      next: (res) => {
-        this.mode = 'EDIT_TODOS';
-        this.doc = res.doc;
-        this._eventService.stopLoading();
+    const matchDate =  where('date', '==', this.date);
+    const matchCreator = where('creator', '==', this._authService.userSubject.getValue()!.id );
 
-        this.filterTodos();
-        this.countActiveTodos();
-        this.checkButtons();
-      },
-      error: (err) => {
-        this.doc = {
-          _id: '',
-          creator: '',
-          todos: [],
-          date: this.date
-        };
+    const todosRef = collection(this.db, 'todos');
+    const q = query(todosRef, matchDate, matchCreator);
 
-        this._eventService.stopLoading();
-        this.filterTodos();
-        this._notificationService.showNotification(err.error.message, 'Info');
-        this.mode = 'NEW_TODOS';
+    getDocs(q).then((querySnapshot) => {
+      this.mode = querySnapshot.empty ? 'NEW_TODOS' : 'EDIT_TODOS';
+
+      if (!querySnapshot.empty) {
+        this.docId = querySnapshot.docs[0].id;
+        this.docRef = querySnapshot.docs[0].ref;
+
+        this.todos = (querySnapshot.docs[0].data() as any).todos;
+      } else {
+        this.todos = [];
       }
-    });
+
+      this.filterTodos();
+      this.countActiveTodos();
+      this.checkButtons();
+    }).finally(() => this._eventService.stopLoading());
   }
 
   private updateTodos(): void {
-    this._http.put<{ message: string }>(`${this.baseURL}/${this.date}`, this.doc)
-    .subscribe({
-      next: (res) => {
-        this.mode = 'EDIT_TODOS';
-        this._notificationService.showNotification(res.message, 'Success');
-      },
-      error: (err) => {
-        this._notificationService.showNotification(err.error.message, 'Error');
-      }
-    });
+    this._eventService.startLoading();
+
+    setDoc(this.docRef!, { todos: this.todos }, { merge: true } )
+      .then((res) => {
+        console.log(res);
+      })
+      .catch(err => {
+        console.log(err);
+      })
+      .finally(() => this._eventService.stopLoading());
   }
 
   private saveTodos(): void {
-    this._http.post<{ doc: ITodoResponse}>(`${this.baseURL}/${this.date}`, this.doc.todos)
-    .subscribe({
-      next: (res) => {
+    this._eventService.startLoading();
+
+      this._authService.user$.pipe(
+        take(1),
+        switchMap((user) => {
+          return from(addDoc(collection(this.db, 'todos'), {
+            todos: this.todos,
+            date: this.date,
+            creator: user!.id
+          }));
+        }),
+        finalize(() => this._eventService.stopLoading())
+      ).subscribe(() => {
         this.mode = 'EDIT_TODOS';
-        this.doc = res.doc;
       },
-      error: (err) => {
-        this._notificationService.showNotification(err.error.message, 'Error');
-      }
-    });
+        (err) => {
+        console.log(err);
+        });
   }
 
   private deleteTodoDoc(): void {
-    this._http.delete(`${this.baseURL}/${this.date}`).subscribe({
-      next: () => {
-        this.mode = 'NEW_TODOS';
-      }
-    });
+    this._eventService.startLoading();
+
+    deleteDoc(this.docRef!)
+      .then(() => {
+        console.log('DOC DELETED!')
+      })
+      .catch(() => {
+        console.log('ERR WHILE DELETING')
+      })
+      .finally(() => this._eventService.stopLoading());
   }
 }

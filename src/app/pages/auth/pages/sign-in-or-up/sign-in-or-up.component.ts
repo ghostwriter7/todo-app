@@ -40,25 +40,27 @@ export class SignInOrUpComponent implements OnInit {
   public onSubmit(): void {
       const { email, password } = this.form.value;
 
-      let obs$: Observable<any>;
+      this.mode === 'Login' ? this.authService.login(email, password) : this.authService.signup(email, password);
 
-      obs$ = this.mode === 'Login' ? this.authService.login(email, password) : this.authService.signup(email, password);
+      // let obs$: Observable<any>;
 
-      obs$.subscribe({
-        next: () => {
-          const today = new Date();
-          const date = today.getDate().toString().padStart(2, '0');
-          const month = (today.getMonth() + 1).toString().padStart(2, '0');
-          const path = `${date}-${month}-${today.getFullYear()}`;
+      // obs$ = this.mode === 'Login' ? this.authService.login(email, password) : this.authService.signup(email, password);
 
-          this.router.navigate(['/todo', path]);
-          const message = this.mode === 'Login' ? "You've logged in successfully!" : "You've signed up successfully!";
-
-          this.notificationService.showNotification(message, 'Success');
-        },
-        error: (err) => {
-          return;
-        }
-      });
+      // obs$.subscribe({
+      //   next: () => {
+      //     const today = new Date();
+      //     const date = today.getDate().toString().padStart(2, '0');
+      //     const month = (today.getMonth() + 1).toString().padStart(2, '0');
+      //     const path = `${date}-${month}-${today.getFullYear()}`;
+      //
+      //     this.router.navigate(['/todo', path]);
+      //     const message = this.mode === 'Login' ? "You've logged in successfully!" : "You've signed up successfully!";
+      //
+      //     this.notificationService.showNotification(message, 'Success');
+      //   },
+      //   error: (err) => {
+      //     return;
+      //   }
+      // });
   }
 }

@@ -11,7 +11,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { SpinnerComponent } from './ui/spinner/spinner.component';
 import { NavbarComponent } from './ui/navbar/navbar.component';
-import { AuthInterceptor } from './core/interceptors/auth.interceptor';
+// import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 
 @NgModule({
   declarations: [
@@ -30,11 +30,11 @@ import { AuthInterceptor } from './core/interceptors/auth.interceptor';
     HttpClientModule,
   ],
   providers: [
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: AuthInterceptor,
-      multi: true
-    }
+    // {
+    //   provide: HTTP_INTERCEPTORS,
+    //   useClass: AuthInterceptor,
+    //   multi: true
+    // }
   ],
   bootstrap: [AppComponent]
 })
