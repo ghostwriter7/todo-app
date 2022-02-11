@@ -1,0 +1,119 @@
+.dropdown-wrapper {
+  height: 100%;
+  position: relative;
+
+  .dropdown-toggle {
+    position: relative;
+    outline: none;
+    width: 30px;
+    height: 30px;
+    transform: rotate(90deg);
+    transition: transform 0.5s ease-in-out;
+    background-color: transparent;
+    border: 0;
+    cursor: pointer;
+
+    &.active {
+      transform: rotate(-90deg);
+    }
+
+    &::before {
+      content: '\2039';
+      color: var(--color-primary);
+      inset: 0;
+      font-size: 20px;
+      position: absolute;
+    }
+  }
+
+  .search-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+
+    .selected-option {
+      color: #fff;
+      background-color: var(--color-primary);
+      padding: 8px 16px;
+      border-radius: 10px;
+    }
+
+    input {
+      outline: none;
+      background-color: var(--color-primary);
+      color: #fff;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+
+      &::placeholder {
+        color: #fff;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-size: 0.5rem;
+      }
+    }
+  }
+
+  .options-wrapper {
+    position: absolute;
+    z-index: 1000;
+    max-height: 100px;
+    width: 100%;
+    overflow-y: scroll;
+    background-color: var(--bg-color);
+    border-radius: 0 0 0 10px;
+
+    &::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background-color: var(--bg-color);
+      border-radius: 0 5px 5px 0;
+      overflow: hidden;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--color-accent);
+      border-radius: 0 4px 4px 0;
+    }
+
+    ul {
+      background-color: var(--bg-color);
+
+      li {
+        color: var(--color-text-primary);
+        margin-block: .25rem;
+        background-color: var(--bg-secondary-color);
+        padding: .25rem 1rem;
+        cursor: pointer;
+
+        &:hover {
+          background-color: var(--color-accent);
+          color: #fff;
+        }
+
+        &.selected {
+          background-color: var(--color-primary);
+          color: #fff;
+        }
+      }
+    }
+  }
+
+  .no-options {
+    position: absolute;
+    z-index: 1000;
+    width: 100%;
+    border-radius: 25px;
+    opacity: .8;
+    background-color: var(--bg-color);
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-block: 10px;
+  }
+}

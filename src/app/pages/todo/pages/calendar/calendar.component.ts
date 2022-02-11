@@ -40,8 +40,8 @@ export class CalendarComponent implements OnInit {
     this.renderCalendar();
   }
 
-  public onMonthSelected(e: Event): void {
-    this.currentMonth = +(e.target as HTMLInputElement).value;
+  public onMonthSelected(month: number): void {
+    this.currentMonth = month;
     this.renderCalendar();
   }
 

@@ -228,8 +228,9 @@ export class TodoService {
           }));
         }),
         finalize(() => this._eventService.stopLoading())
-      ).subscribe(() => {
-        this.mode = 'EDIT_TODOS';
+      ).subscribe((doc) => {
+          console.log(doc);
+          this.mode = 'EDIT_TODOS';
       },
         (err) => {
         console.log(err);

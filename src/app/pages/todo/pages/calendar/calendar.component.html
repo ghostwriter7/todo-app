@@ -1,5 +1,5 @@
 <div class="container">
-  <div class="header flex justify-around">
+  <div class="header flex justify-between">
     <div class="year-wrapper flex justify-between align-center">
       <button
         [disabled]="currentYear <= 2022"
@@ -8,9 +8,15 @@
       <button (click)="onNextYear()">+</button>
     </div>
     <div class="month-wrapper flex">
-      <select [ngModel]="currentMonth" name="month" (change)="onMonthSelected($event)">
-        <option  *ngFor="let month of months; let i = index" [value]="i">{{ month }}</option>
-      </select>
+      <app-dropdown
+        [options]="months"
+        [preSelectedOption]="currentMonth"
+        label="month"
+        (optionSelected)="onMonthSelected($event)"
+      ></app-dropdown>
+<!--      <select [ngModel]="currentMonth" name="month" (change)="onMonthSelected($event)">-->
+<!--        <option  *ngFor="let month of months; let i = index" [value]="i">{{ month }}</option>-->
+<!--      </select>-->
     </div>
   </div>
   <div class="content">

@@ -7,6 +7,7 @@ import { AddTodoComponent } from './pages/add-todo/add-todo.component';
 import { TodoListComponent } from './pages/todo-list/todo-list.component';
 import { TodoWrapperComponent } from './pages/todo-wrapper/todo-wrapper.component';
 import { CalendarComponent } from './pages/calendar/calendar.component';
+import { UiModule } from '../../ui/ui.module';
 
 @NgModule({
   declarations: [
@@ -19,7 +20,8 @@ import { CalendarComponent } from './pages/calendar/calendar.component';
   imports: [
     CommonModule,
     FormsModule,
-    TodoRoutingModule
+    TodoRoutingModule,
+    UiModule
   ],
   exports: []
 })

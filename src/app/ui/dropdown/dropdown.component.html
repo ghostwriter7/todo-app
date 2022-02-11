@@ -1,0 +1,34 @@
+<div class="dropdown-wrapper">
+  <div class="search-wrapper">
+    <input
+      #searchInput
+      *ngIf="isOpen"
+      type="text"
+      placeholder="Type to search..."
+      (input)="onSearch($event)">
+    <span *ngIf="!isOpen && selectedOption" class="selected-option">{{ selectedOption.value }}</span>
+    <button
+      #toggle
+      (click)="onOpen()"
+      class="dropdown-toggle"
+      [ngClass]="{ active: isOpen }"
+    ></button>
+  </div>
+
+  <div
+    #options
+    class="options-wrapper"
+    *ngIf="isOpen && filteredOptions.length">
+    <ul>
+      <li
+        [ngClass]="{ selected: selectedOption === option }"
+        (click)="onSelected(option)"
+        *ngFor="let option of filteredOptions; let i = index"
+      >{{ option.value }}</li>
+    </ul>
+  </div>
+  <div *ngIf="isOpen && !filteredOptions.length" class="no-options">
+    No results...
+  </div>
+</div>
+

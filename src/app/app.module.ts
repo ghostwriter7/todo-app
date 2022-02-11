@@ -5,13 +5,12 @@ import { AppComponent } from './app.component';
 import { FormsModule } from '@angular/forms';
 import { HeaderComponent } from './ui/header/header.component';
 import { NotificationComponent } from './ui/notification/notification.component';
-import { PlaceholderDirective } from './core/directives/placeholder.directive';
+import { PlaceholderDirective } from './core/directives';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
-import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http';
 import { SpinnerComponent } from './ui/spinner/spinner.component';
 import { NavbarComponent } from './ui/navbar/navbar.component';
-// import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 
 @NgModule({
   declarations: [
@@ -20,7 +19,7 @@ import { NavbarComponent } from './ui/navbar/navbar.component';
     NotificationComponent,
     PlaceholderDirective,
     SpinnerComponent,
-    NavbarComponent
+    NavbarComponent,
   ],
   imports: [
     BrowserModule,
@@ -28,13 +27,6 @@ import { NavbarComponent } from './ui/navbar/navbar.component';
     BrowserAnimationsModule,
     AppRoutingModule,
     HttpClientModule,
-  ],
-  providers: [
-    // {
-    //   provide: HTTP_INTERCEPTORS,
-    //   useClass: AuthInterceptor,
-    //   multi: true
-    // }
   ],
   bootstrap: [AppComponent]
 })
