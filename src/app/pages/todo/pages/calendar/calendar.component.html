@@ -2,21 +2,18 @@
   <div class="header flex justify-between">
     <div class="year-wrapper flex justify-between align-center">
       <button
-        [disabled]="currentYear <= 2022"
+        [disabled]="(_calendarService.currentYear$ | async)! <= 2022"
         (click)="onPrevYear()">-</button>
-      <span class="chosen-year">{{ currentYear }}</span>
+      <span class="chosen-year">{{ _calendarService.currentYear$ | async }}</span>
       <button (click)="onNextYear()">+</button>
     </div>
     <div class="month-wrapper flex">
       <app-dropdown
         [options]="months"
-        [preSelectedOption]="currentMonth"
+        [preSelectedOption]="(_calendarService.currentMonth$ | async)!"
         label="month"
         (optionSelected)="onMonthSelected($event)"
       ></app-dropdown>
-<!--      <select [ngModel]="currentMonth" name="month" (change)="onMonthSelected($event)">-->
-<!--        <option  *ngFor="let month of months; let i = index" [value]="i">{{ month }}</option>-->
-<!--      </select>-->
     </div>
   </div>
   <div class="content">
@@ -29,16 +26,24 @@
       <div class="label">Sat</div>
       <div class="label">Sun</div>
     </div>
-    <div class="tiles-wrapper flex justify-between">
-      <span [style.flex-basis]="startingGap" ></span>
+    <div
+      *ngIf="_calendarService.calendarSubject | async"
+      class="tiles-wrapper flex justify-between">
+      <span
+        [style.flex-basis]="_calendarService.startingGap$ | async" ></span>
       <div
-        *ngFor="let tile of calendarData"
+        *ngFor="let tile of _calendarService.calendarSubject | async"
         [ngClass]="{ today: tile.isToday, past: tile.hasPassed }"
         (click)="onSelectDate(tile.date!)"
-        class="tile">{{ tile.date }}</div>
+        class="tile">{{ tile.date }}
       <span
-        [style.flex-basis]="endingGap"
-        class="spacer-ending"></span>
+        *ngIf="tile.completed && tile.total"
+        class="tile-details"
+      >{{ tile.completed + '/' + tile.total }}</span>
+      </div>
+      <span
+        [style.flex-basis]="_calendarService.endingGap$ | async"
+        ></span>
     </div>
   </div>
 </div>
