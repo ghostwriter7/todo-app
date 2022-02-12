@@ -1,5 +1,6 @@
 .container {
   box-shadow: var(--box-shadow);
+
   .header {
     background-color: var(--bg-secondary-color);
     padding: 1rem 2rem;
@@ -29,12 +30,14 @@
     background-color: var(--color-accent);
     padding: 1.5rem;
     border-radius: 0 0 10px 10px;
-    text-align: center;
 
     .week-days {
       margin-bottom: 1rem;
       background-color: var(--color-primary);
       border-radius: 5px;
+      text-align: center;
+
+
       .label {
         font-size: min(3vw, 1rem);
         color: #fff;
@@ -57,6 +60,13 @@
         cursor: pointer;
         color: var(--color-text-primary);
         position: relative;
+        overflow: hidden;
+        text-align: center;
+
+        &.details {
+          text-align: left;
+          padding-left: .8rem;
+        }
 
         &:hover {
           opacity: 1;
@@ -78,22 +88,40 @@
             inset: 0;
             border-radius: 5px;
             background-image: linear-gradient(45deg,
-            var(--color-primary) 25%,
-            rgba(0,0,0,0) 25%,
-            rgba(0,0,0,0) 50%,
-            var(--color-primary) 50%,
-            var(--color-primary)75%,
-            rgba(0,0,0,0) 75%,
-            rgba(0,0,0,0) 100%);
+              var(--color-primary) 25%,
+              rgba(0, 0, 0, 0) 25%,
+              rgba(0, 0, 0, 0) 50%,
+              var(--color-primary) 50%,
+              var(--color-primary) 75%,
+              rgba(0, 0, 0, 0) 75%,
+              rgba(0, 0, 0, 0) 100%);
             background-size: 18px 18px;
             opacity: .3;
           }
         }
+
         .tile-details {
           position: absolute;
-          right: 2px;
-          bottom: 2px;
+          right: 4px;
+          bottom: 4px;
           font-size: .7rem;
+          padding: 3px;
+          border-radius: 2px;
+
+          &.success {
+            color: var(--text-success);
+            background-color: rgba(green, .3);
+          }
+
+          &.fail {
+            color: var(--text-danger);
+            background-color: rgba(red, .3);
+          }
+
+          &.progress {
+            color: var(--text-progress);
+            background-color: rgba(cyan, .3);
+          }
         }
       }
     }

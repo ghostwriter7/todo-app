@@ -33,12 +33,16 @@
         [style.flex-basis]="_calendarService.startingGap$ | async" ></span>
       <div
         *ngFor="let tile of _calendarService.calendarSubject | async"
-        [ngClass]="{ today: tile.isToday, past: tile.hasPassed }"
+        [ngClass]="{ today: tile.isToday, past: tile.hasPassed, details: tile.total }"
         (click)="onSelectDate(tile.date!)"
         class="tile">{{ tile.date }}
       <span
-        *ngIf="tile.total"
+        *ngIf="tile.total && tile.completed !== undefined"
         class="tile-details"
+        [ngClass]="{
+        success: tile.completed === tile.total,
+        fail: tile.completed === 0,
+        progress: tile.completed > 0 && tile.completed < tile.total }"
       >{{ tile.completed + '/' + tile.total }}</span>
       </div>
       <span

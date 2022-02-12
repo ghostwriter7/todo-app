@@ -206,11 +206,12 @@ export class TodoService {
   }
 
   private updateTodos(): void {
+    console.log('UPDATE TODOS STARTED')
     this._eventService.startLoading();
-    this.updateMonthlyData();
 
     setDoc(this.docRef!, { todos: this.todos }, { merge: true } )
       .then((res) => {
+        this.updateMonthlyData();
         console.log('TODO DOC UPDATED');
       })
       .catch(err => {
@@ -220,10 +221,10 @@ export class TodoService {
   }
 
   private saveTodos(): void {
+    console.log('SAVE TODOS STARTED')
     this._eventService.startLoading();
-    this.updateMonthlyData();
-
-      this._authService.user$.pipe(
+    console.log(this.date);
+    this._authService.user$.pipe(
         take(1),
         switchMap((user) => {
           return from(addDoc(collection(this.db, 'todos'), {
@@ -234,7 +235,9 @@ export class TodoService {
         }),
         finalize(() => this._eventService.stopLoading())
       ).subscribe((doc) => {
-          console.log('TODO DOC CREATED');
+        this.updateMonthlyData();
+        this.docRef = doc;
+        console.log('TODO DOC CREATED');
           this.mode = 'EDIT_TODOS';
       },
         (err) => {
@@ -258,11 +261,13 @@ export class TodoService {
 
   private updateMonthlyData(): void {
     const docRef = this._calendarService.monthDocRef;
+    console.log(docRef, 'doc ref');
     let day = this.date.split('-')[0];
     day = day.startsWith('0') ? day[1] : day;
     const total = this.todos.length;
     const completed = this.todos.filter(todo => !todo.isActive).length;
-
+    console.log(total, 'total');
+    console.log(completed, 'completed');
     if (docRef) {
       setDoc(docRef, { [day]: { total, completed }}, { merge: true })
         .then((res) => {
@@ -276,13 +281,15 @@ export class TodoService {
         this._authService.user$,
         this._calendarService.currentYear$,
         this._calendarService.currentMonth$
-      ).subscribe(([user, year, month]) => {
+      ).pipe(take(1))
+      .subscribe(([user, year, month]) => {
         addDoc(collection(this.db, 'months'), {
           creator: user!.id,
           year,
           month,
           [day]: { total, completed }
         }).then((res) => {
+          this._calendarService.monthDocRef = res;
           console.log('MONTH DATA CREATED');
         })
           .catch(err => {
