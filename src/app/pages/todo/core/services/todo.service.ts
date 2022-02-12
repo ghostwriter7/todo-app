@@ -1,14 +1,36 @@
 import { Injectable, ViewChild } from '@angular/core';
-import { BehaviorSubject, combineLatest, finalize, from, ReplaySubject, Subject, switchMap, take } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  finalize, forkJoin,
+  from, map,
+  Observable,
+  ReplaySubject,
+  Subject,
+  switchMap,
+  take, tap
+} from 'rxjs';
 import { ITodoItem } from '../interfaces';
 import { PlaceholderDirective } from '../../../../core/directives/';
 import { HttpClient } from '@angular/common/http';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { EventsService } from '../../../../core/services/events.service';
-import { getFirestore, Firestore, collection, addDoc, getDocs, query, where, DocumentReference, setDoc, deleteDoc } from 'firebase/firestore';
+import {
+  getFirestore,
+  Firestore,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  DocumentReference,
+  setDoc,
+  deleteDoc
+} from 'firebase/firestore';
 import { app } from '../../../../core/libs/firebase';
 import { AuthService } from '../../../auth/core/services/auth.service';
 import { CalendarService } from './calendar.service';
+import { FirestoreService } from '../../../../core/services/firestore.service';
 
 @Injectable({
   providedIn: 'root'
@@ -49,11 +71,12 @@ export class TodoService {
   private readonly db: Firestore;
 
   constructor(
-    private _http: HttpClient,
-    private _notificationService: NotificationService,
-    private _eventService: EventsService,
-    private _authService: AuthService,
-    private _calendarService: CalendarService
+    private readonly _http: HttpClient,
+    private readonly _notificationService: NotificationService,
+    private readonly _eventService: EventsService,
+    private readonly _authService: AuthService,
+    private readonly _calendarService: CalendarService,
+    private readonly _firestoreService: FirestoreService
   ) {
     this.db = getFirestore(app);
   }
@@ -80,9 +103,9 @@ export class TodoService {
   }
 
   public showNextPage(): void {
-   this.currentPage++;
-   this.currentPageSubject.next(this.currentPage);
-   this.checkButtons();
+    this.currentPage++;
+    this.currentPageSubject.next(this.currentPage);
+    this.checkButtons();
   }
 
   public showPrevPage(): void {
@@ -161,7 +184,7 @@ export class TodoService {
       return;
     }
 
-    this.todos.unshift({ content: todo, isActive: true });
+    this.todos.unshift({content: todo, isActive: true});
 
     this.mode === 'NEW_TODOS' ? this.saveTodos() : this.updateTodos();
 
@@ -181,13 +204,12 @@ export class TodoService {
     this._eventService.startLoading();
     this.initDate(date);
 
-    const matchDate =  where('date', '==', this.date);
-    const matchCreator = where('creator', '==', this._authService.userSubject.getValue()!.id );
+    const matchDate = where('date', '==', this.date);
+    const matchCreator = where('creator', '==', this._authService.userSubject.getValue()!.id);
 
-    const todosRef = collection(this.db, 'todos');
-    const q = query(todosRef, matchDate, matchCreator);
-
-    getDocs(q).then((querySnapshot) => {
+    this._firestoreService.getDocs('todos', matchDate, matchCreator)
+    .pipe(finalize(() => this._eventService.stopLoading()))
+    .subscribe((querySnapshot => {
       this.mode = querySnapshot.empty ? 'NEW_TODOS' : 'EDIT_TODOS';
 
       if (!querySnapshot.empty) {
@@ -202,100 +224,108 @@ export class TodoService {
       this.filterTodos();
       this.countActiveTodos();
       this.checkButtons();
-    }).finally(() => this._eventService.stopLoading());
+    }));
   }
 
   private updateTodos(): void {
     console.log('UPDATE TODOS STARTED')
     this._eventService.startLoading();
 
-    setDoc(this.docRef!, { todos: this.todos }, { merge: true } )
-      .then((res) => {
-        this.updateMonthlyData();
-        console.log('TODO DOC UPDATED');
-      })
-      .catch(err => {
-        console.error('ERROR: TODO DOC UPDATED', err);
-      })
-      .finally(() => this._eventService.stopLoading());
+    this._firestoreService.updateDoc(this.docRef!, {todos: this.todos})
+    .pipe(
+      switchMap(() =>
+        this._calendarService.monthDocRef$.pipe(
+          take(1),
+          map((docRef) => docRef ? this.updateMonthlyDoc(docRef) : this.createMonthlyDoc())
+        )),
+      finalize(() => this._eventService.stopLoading())
+    ).subscribe(() => {
+      console.log('DATA UPDATED')
+    }, (err) => {
+      console.log('ERROR');
+    });
   }
 
   private saveTodos(): void {
-    console.log('SAVE TODOS STARTED')
     this._eventService.startLoading();
-    console.log(this.date);
+
     this._authService.user$.pipe(
-        take(1),
-        switchMap((user) => {
-          return from(addDoc(collection(this.db, 'todos'), {
+      take(1),
+      switchMap((user) => {
+        return this._firestoreService.createDoc('todos',
+          {
             todos: this.todos,
             date: this.date,
             creator: user!.id
-          }));
-        }),
-        finalize(() => this._eventService.stopLoading())
-      ).subscribe((doc) => {
-        this.updateMonthlyData();
-        this.docRef = doc;
+          });
+      }),
+      tap((doc) => this.docRef = doc),
+      switchMap(() => this._calendarService.monthDocRef$.pipe(
+        take(1),
+        switchMap(docRef => docRef ? this.updateMonthlyDoc(docRef) : this.createMonthlyDoc())
+      )),
+      finalize(() => this._eventService.stopLoading())
+    ).subscribe(() => {
         console.log('TODO DOC CREATED');
-          this.mode = 'EDIT_TODOS';
+        this.mode = 'EDIT_TODOS';
       },
-        (err) => {
+      (err) => {
         console.error('ERROR - TODO DOC', err);
-        });
+      });
   }
 
   private deleteTodoDoc(): void {
     this._eventService.startLoading();
-    this.updateMonthlyData();
 
-    deleteDoc(this.docRef!)
-      .then(() => {
-        console.log('DOC DELETED!')
-      })
-      .catch(() => {
-        console.log('ERR WHILE DELETING')
-      })
-      .finally(() => this._eventService.stopLoading());
+    this._firestoreService.deleteDoc(this.docRef!)
+    .pipe(
+      switchMap(() => this._calendarService.monthDocRef$.pipe(
+        take(1),
+        switchMap(docRef => this.updateMonthlyDoc(docRef!))
+      )),
+      finalize(() => this._eventService.stopLoading()))
+    .subscribe(() => {
+      this.mode = 'NEW_TODOS';
+    });
   }
 
-  private updateMonthlyData(): void {
-    const docRef = this._calendarService.monthDocRef;
-    console.log(docRef, 'doc ref');
+  private createMonthlyDoc(): Observable<any> {
+    console.log('CREATE MONTHLY DOC')
+
+    return combineLatest(
+        [this._authService.user$,
+        this._calendarService.currentMonth$,
+        this._calendarService.currentYear$]
+      ).pipe(
+        tap(([user, month, year]) => console.log(user, month, year)),
+        take(1),
+        switchMap(([user, month, year]) => {
+          const {day, total, completed} = this.prepareMonthlyUpdate();
+
+          return this._firestoreService.createDoc('months', {
+            creator: user!.id,
+            month,
+            year,
+            [day]: {total, completed}
+          }).pipe(tap(docRef => this._calendarService.monthDocSubject$.next(docRef)))
+        })
+    )
+  }
+
+  private updateMonthlyDoc(docRef: DocumentReference): Observable<any> {
+    const {day, total, completed} = this.prepareMonthlyUpdate();
+
+    return this._firestoreService.updateDoc(docRef,
+      {[day]: {total, completed}});
+  }
+
+  private prepareMonthlyUpdate(): { day: string, total: number, completed: number } {
     let day = this.date.split('-')[0];
     day = day.startsWith('0') ? day[1] : day;
+
     const total = this.todos.length;
     const completed = this.todos.filter(todo => !todo.isActive).length;
-    console.log(total, 'total');
-    console.log(completed, 'completed');
-    if (docRef) {
-      setDoc(docRef, { [day]: { total, completed }}, { merge: true })
-        .then((res) => {
-          console.log('MONTH DATA UPDATED');
-        })
-        .catch((err) => {
-          console.error('MONTH DATA UPDATE: ', err);
-        })
-    } else {
-      combineLatest(
-        this._authService.user$,
-        this._calendarService.currentYear$,
-        this._calendarService.currentMonth$
-      ).pipe(take(1))
-      .subscribe(([user, year, month]) => {
-        addDoc(collection(this.db, 'months'), {
-          creator: user!.id,
-          year,
-          month,
-          [day]: { total, completed }
-        }).then((res) => {
-          this._calendarService.monthDocRef = res;
-          console.log('MONTH DATA CREATED');
-        })
-          .catch(err => {
-            console.error('MONTH DATA CREATED: ', err);
-          });
-      });
-    }
+
+    return {day, total, completed};
   }
 }

@@ -8,7 +8,6 @@ import {
   query,
   where,
   collection,
-  DocumentData,
   DocumentReference
 } from 'firebase/firestore';
 import { app } from '../../../../core/libs/firebase';
@@ -22,14 +21,16 @@ export class CalendarService implements OnInit {
   private currentYear = new Date().getFullYear();
   private currentMonth = new Date().getMonth();
   private  calendarData: { [key:string]: any, date: number, isToday: boolean, hasPassed: boolean, total?: number, completed?: number }[] = [];
-  private currentYearSubject = new BehaviorSubject<number>(this.currentYear);
-  private currentMonthSubject = new BehaviorSubject<number>(this.currentMonth);
+  public currentYearSubject = new BehaviorSubject<number>(this.currentYear);
+  public currentMonthSubject = new BehaviorSubject<number>(this.currentMonth);
   public calendarSubject = new BehaviorSubject<{ date: number, isToday: boolean, hasPassed: boolean, total?: number, completed?: number }[]>(this.calendarData);
 
   private readonly db!: Firestore;
 
   private monthData: any;
   public monthDocRef?: DocumentReference;
+  public monthDocSubject$ = new BehaviorSubject<DocumentReference | undefined>(this.monthDocRef);
+  public monthDocRef$ = this.monthDocSubject$.asObservable();
 
   public currentYear$ = this.currentYearSubject.asObservable();
   public currentMonth$ = this.currentMonthSubject.asObservable();
@@ -67,7 +68,7 @@ export class CalendarService implements OnInit {
         if (querySnapshot.docs.length) {
           this.monthData = querySnapshot.docs[0].data();
           this.monthDocRef = querySnapshot.docs[0].ref;
-
+          this.monthDocSubject$.next(this.monthDocRef);
           const days = new Array(31).fill((0)).map((_, idx) => (idx + 1).toString());
 
           for (let key in this.monthData) {
@@ -79,7 +80,10 @@ export class CalendarService implements OnInit {
           }
         } else {
           this.monthDocRef = undefined;
+          this.monthDocSubject$.next(undefined);
         }
+
+        console.log(this.monthDocRef);
       })
       .catch((err) => {
         console.log(err);
