@@ -37,7 +37,7 @@
         (click)="onSelectDate(tile.date!)"
         class="tile">{{ tile.date }}
       <span
-        *ngIf="tile.completed && tile.total"
+        *ngIf="tile.total"
         class="tile-details"
       >{{ tile.completed + '/' + tile.total }}</span>
       </div>

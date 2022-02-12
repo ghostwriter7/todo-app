@@ -12,9 +12,8 @@ export class CalendarComponent implements OnInit, AfterViewInit {
   public readonly months: string[] = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
     'September', 'October', 'November', 'December'];
 
-
-public currentMonth!: number;
-public currentYear!: number;
+  public currentMonth!: number;
+  public currentYear!: number;
 
   constructor(
     private router: Router,

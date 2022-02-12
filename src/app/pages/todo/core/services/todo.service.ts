@@ -5,9 +5,10 @@ import { PlaceholderDirective } from '../../../../core/directives/';
 import { HttpClient } from '@angular/common/http';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { EventsService } from '../../../../core/services/events.service';
-import { getFirestore, Firestore, collection, addDoc, getDocs, query, where, DocumentReference, DocumentData, setDoc, deleteDoc } from 'firebase/firestore';
+import { getFirestore, Firestore, collection, addDoc, getDocs, query, where, DocumentReference, setDoc, deleteDoc } from 'firebase/firestore';
 import { app } from '../../../../core/libs/firebase';
 import { AuthService } from '../../../auth/core/services/auth.service';
+import { CalendarService } from './calendar.service';
 
 @Injectable({
   providedIn: 'root'
@@ -51,7 +52,8 @@ export class TodoService {
     private _http: HttpClient,
     private _notificationService: NotificationService,
     private _eventService: EventsService,
-    private _authService: AuthService
+    private _authService: AuthService,
+    private _calendarService: CalendarService
   ) {
     this.db = getFirestore(app);
   }
@@ -162,6 +164,7 @@ export class TodoService {
     this.todos.unshift({ content: todo, isActive: true });
 
     this.mode === 'NEW_TODOS' ? this.saveTodos() : this.updateTodos();
+
     this.filterTodos();
     this.countActiveTodos();
     this.checkButtons();
@@ -204,19 +207,21 @@ export class TodoService {
 
   private updateTodos(): void {
     this._eventService.startLoading();
+    this.updateMonthlyData();
 
     setDoc(this.docRef!, { todos: this.todos }, { merge: true } )
       .then((res) => {
-        console.log(res);
+        console.log('TODO DOC UPDATED');
       })
       .catch(err => {
-        console.log(err);
+        console.error('ERROR: TODO DOC UPDATED', err);
       })
       .finally(() => this._eventService.stopLoading());
   }
 
   private saveTodos(): void {
     this._eventService.startLoading();
+    this.updateMonthlyData();
 
       this._authService.user$.pipe(
         take(1),
@@ -229,16 +234,17 @@ export class TodoService {
         }),
         finalize(() => this._eventService.stopLoading())
       ).subscribe((doc) => {
-          console.log(doc);
+          console.log('TODO DOC CREATED');
           this.mode = 'EDIT_TODOS';
       },
         (err) => {
-        console.log(err);
+        console.error('ERROR - TODO DOC', err);
         });
   }
 
   private deleteTodoDoc(): void {
     this._eventService.startLoading();
+    this.updateMonthlyData();
 
     deleteDoc(this.docRef!)
       .then(() => {
@@ -248,5 +254,41 @@ export class TodoService {
         console.log('ERR WHILE DELETING')
       })
       .finally(() => this._eventService.stopLoading());
+  }
+
+  private updateMonthlyData(): void {
+    const docRef = this._calendarService.monthDocRef;
+    let day = this.date.split('-')[0];
+    day = day.startsWith('0') ? day[1] : day;
+    const total = this.todos.length;
+    const completed = this.todos.filter(todo => !todo.isActive).length;
+
+    if (docRef) {
+      setDoc(docRef, { [day]: { total, completed }}, { merge: true })
+        .then((res) => {
+          console.log('MONTH DATA UPDATED');
+        })
+        .catch((err) => {
+          console.error('MONTH DATA UPDATE: ', err);
+        })
+    } else {
+      combineLatest(
+        this._authService.user$,
+        this._calendarService.currentYear$,
+        this._calendarService.currentMonth$
+      ).subscribe(([user, year, month]) => {
+        addDoc(collection(this.db, 'months'), {
+          creator: user!.id,
+          year,
+          month,
+          [day]: { total, completed }
+        }).then((res) => {
+          console.log('MONTH DATA CREATED');
+        })
+          .catch(err => {
+            console.error('MONTH DATA CREATED: ', err);
+          });
+      });
+    }
   }
 }

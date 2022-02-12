@@ -1,9 +1,19 @@
 import { Injectable, OnInit } from '@angular/core';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { AuthService } from '../../../auth/core/services/auth.service';
-import { Firestore, getFirestore, getDocs, query, where, collection } from 'firebase/firestore';
+import {
+  Firestore,
+  getFirestore,
+  getDocs,
+  query,
+  where,
+  collection,
+  DocumentData,
+  DocumentReference
+} from 'firebase/firestore';
 import { app } from '../../../../core/libs/firebase';
 import { EventsService } from '../../../../core/services/events.service';
+import firebase from 'firebase/compat';
 
 @Injectable({
   providedIn: 'root'
@@ -19,6 +29,7 @@ export class CalendarService implements OnInit {
   private readonly db!: Firestore;
 
   private monthData: any;
+  public monthDocRef?: DocumentReference;
 
   public currentYear$ = this.currentYearSubject.asObservable();
   public currentMonth$ = this.currentMonthSubject.asObservable();
@@ -55,15 +66,19 @@ export class CalendarService implements OnInit {
       .then((querySnapshot) => {
         if (querySnapshot.docs.length) {
           this.monthData = querySnapshot.docs[0].data();
+          this.monthDocRef = querySnapshot.docs[0].ref;
+
           const days = new Array(31).fill((0)).map((_, idx) => (idx + 1).toString());
+
           for (let key in this.monthData) {
             if (days.includes(key)) {
               this.calendarData[+key - 1]['total'] = this.monthData[key].total;
               this.calendarData[+key - 1]['completed'] = this.monthData[key].completed;
-
               this.calendarSubject.next(this.calendarData);
             }
           }
+        } else {
+          this.monthDocRef = undefined;
         }
       })
       .catch((err) => {
