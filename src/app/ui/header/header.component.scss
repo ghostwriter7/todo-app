@@ -13,7 +13,7 @@
 .current-date {
   padding: .5rem;
   border-radius: 5px;
-  width: fit-content;
+  min-width: 180px;
   color: var(--color-text-primary);
   background-color: var(--bg-color);
 }

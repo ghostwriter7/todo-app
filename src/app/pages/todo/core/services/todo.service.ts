@@ -1,9 +1,9 @@
-import { Injectable, ViewChild } from '@angular/core';
+import { Injectable } from '@angular/core';
 import {
   BehaviorSubject,
   combineLatest,
-  finalize, forkJoin,
-  from, map,
+  finalize,
+  map,
   Observable,
   ReplaySubject,
   Subject,
@@ -11,21 +11,14 @@ import {
   take, tap
 } from 'rxjs';
 import { ITodoItem } from '../interfaces';
-import { PlaceholderDirective } from '../../../../core/directives/';
 import { HttpClient } from '@angular/common/http';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { EventsService } from '../../../../core/services/events.service';
 import {
   getFirestore,
   Firestore,
-  collection,
-  addDoc,
-  getDocs,
-  query,
   where,
   DocumentReference,
-  setDoc,
-  deleteDoc
 } from 'firebase/firestore';
 import { app } from '../../../../core/libs/firebase';
 import { AuthService } from '../../../auth/core/services/auth.service';
@@ -36,7 +29,6 @@ import { FirestoreService } from '../../../../core/services/firestore.service';
   providedIn: 'root'
 })
 export class TodoService {
-  @ViewChild(PlaceholderDirective) alertHost!: PlaceholderDirective;
   private todosChanged = new ReplaySubject<ITodoItem[] | null>(1);
   public todos$ = this.todosChanged.asObservable();
 
@@ -228,7 +220,6 @@ export class TodoService {
   }
 
   private updateTodos(): void {
-    console.log('UPDATE TODOS STARTED')
     this._eventService.startLoading();
 
     this._firestoreService.updateDoc(this.docRef!, {todos: this.todos})
@@ -266,7 +257,6 @@ export class TodoService {
       )),
       finalize(() => this._eventService.stopLoading())
     ).subscribe(() => {
-        console.log('TODO DOC CREATED');
         this.mode = 'EDIT_TODOS';
       },
       (err) => {
@@ -290,8 +280,6 @@ export class TodoService {
   }
 
   private createMonthlyDoc(): Observable<any> {
-    console.log('CREATE MONTHLY DOC')
-
     return combineLatest(
         [this._authService.user$,
         this._calendarService.currentMonth$,

@@ -8,19 +8,16 @@ import { TodoService } from '../../pages/todo/core/services/todo.service';
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit {
-
   constructor(
     private _themeService: ThemeService,
     public todoService: TodoService
-    ) {}
+  ) {}
 
   ngOnInit(): void {
-    this.todoService.date$.subscribe()
-
-  }
+    this.todoService.date$.subscribe();
+   }
 
   public onThemeToggle(): void {
     this._themeService.toggleTheme();
   }
-
 }

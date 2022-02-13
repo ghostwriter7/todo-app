@@ -141,4 +141,12 @@ export class CalendarService implements OnInit {
     this.renderCalendar();
   }
 
+  public setDate(year: number, month: number): void {
+    this.currentMonth = month;
+    this.currentYear = year;
+
+    this.currentMonthSubject.next(this.currentMonth);
+    this.currentYearSubject.next(this.currentYear);
+  }
+
 }

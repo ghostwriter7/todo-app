@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../pages/auth/core/services/auth.service';
+import { CalendarService } from '../../pages/todo/core/services/calendar.service';
 
 @Component({
   selector: 'app-navbar',
@@ -9,7 +10,10 @@ import { AuthService } from '../../pages/auth/core/services/auth.service';
 export class NavbarComponent implements OnInit {
   public path!: string;
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private readonly _calendarService: CalendarService
+  ) {}
 
   ngOnInit() {
     const today = new Date();
@@ -17,6 +21,11 @@ export class NavbarComponent implements OnInit {
     const month = (today.getMonth() + 1).toString().padStart(2, '0');
 
     this.path = `${date}-${month}-${today.getFullYear()}`;
+  }
+
+  public onTodayClicked(): void {
+    const today = new Date();
+    this._calendarService.setDate(today.getFullYear(), today.getMonth());
   }
 
   public onLogout(): void {

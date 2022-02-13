@@ -1,5 +1,8 @@
 <div class="container flex justify-between">
-  <a [routerLink]="['/todo', path]" routerLinkActive="active">Today</a>
+  <a
+    (click)="onTodayClicked()"
+    [routerLink]="['/todo', path]"
+    routerLinkActive="active">Today</a>
   <a routerLink="/todo/calendar" routerLinkActive="active">Calendar</a>
   <span class="spacer"></span>
   <button class="logout-btn" (click)="onLogout()">Logout</button>

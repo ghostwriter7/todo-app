@@ -1,5 +1,8 @@
 <div>
   <h1 class="app-title">TODO</h1>
-  <p class="current-date" *ngIf="todoService.date$ | async">{{ todoService.date$ | async | date: 'mediumDate' }}</p>
+  <div class="flex justify-between current-date"
+     *ngIf="todoService.date$ | async">
+    {{ todoService.date$ | async | date: 'mediumDate' }}
+  </div>
 </div>
 <button class="toggle-theme" (click)="onThemeToggle()"></button>
