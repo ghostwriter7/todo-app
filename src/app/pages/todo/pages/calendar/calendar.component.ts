@@ -1,6 +1,6 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { combineLatest, distinctUntilChanged, filter, map, pairwise, take, tap } from 'rxjs';
+import { combineLatest, Subscription } from 'rxjs';
 import { CalendarService } from '../../core/services/calendar.service';
 
 @Component({
@@ -8,12 +8,14 @@ import { CalendarService } from '../../core/services/calendar.service';
   templateUrl: './calendar.component.html',
   styleUrls: ['./calendar.component.scss']
 })
-export class CalendarComponent implements OnInit, AfterViewInit {
+export class CalendarComponent implements OnInit, AfterViewInit, OnDestroy {
   public readonly months: string[] = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
     'September', 'October', 'November', 'December'];
 
   public currentMonth!: number;
   public currentYear!: number;
+
+  private subscription!: Subscription;
 
   constructor(
     private router: Router,
@@ -24,11 +26,10 @@ export class CalendarComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     setTimeout(() => {
-      combineLatest(
+      this.subscription = combineLatest(
         [this._calendarService.currentMonth$,
           this._calendarService.currentYear$]
-      ).pipe(
-        take(1))
+      ).pipe()
       .subscribe(([month, year]) => {
         console.log(month, 'month');
         console.log(year, 'year');
@@ -55,5 +56,9 @@ export class CalendarComponent implements OnInit, AfterViewInit {
   onSelectDate(date: number): void {
     const path = `${date.toString().padStart(2, '0')}-${(this.currentMonth + 1).toString().padStart(2, '0')}-${this.currentYear}`;
     this.router.navigate(['/todo', path]);
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 }
