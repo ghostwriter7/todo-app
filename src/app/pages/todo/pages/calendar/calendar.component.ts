@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { combineLatest } from 'rxjs';
+import { combineLatest, distinctUntilChanged, filter, map, pairwise, take, tap } from 'rxjs';
 import { CalendarService } from '../../core/services/calendar.service';
 
 @Component({
@@ -20,21 +20,24 @@ export class CalendarComponent implements OnInit, AfterViewInit {
     public readonly _calendarService: CalendarService
   ) {}
 
-  ngOnInit(): void {
-    combineLatest(
-      this._calendarService.currentMonth$,
-      this._calendarService.currentYear$,
-    ).subscribe(([month, year]) => {
-      this.currentYear = year;
-      this.currentMonth = month;
-      this._calendarService.renderCalendar();
-      this._calendarService.fetchMonth(year, month);
-    });
-
-  }
+  ngOnInit(): void {}
 
   ngAfterViewInit() {
-
+    setTimeout(() => {
+      combineLatest(
+        [this._calendarService.currentMonth$,
+          this._calendarService.currentYear$]
+      ).pipe(
+        take(1))
+      .subscribe(([month, year]) => {
+        console.log(month, 'month');
+        console.log(year, 'year');
+        this.currentYear = year;
+        this.currentMonth = month;
+        this._calendarService.renderCalendar();
+        this._calendarService.fetchMonth(year, month);
+      });
+    }, 0);
   }
 
   public onPrevYear(): void {

@@ -1,5 +1,5 @@
 import { Injectable, OnInit } from '@angular/core';
-import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, finalize, ReplaySubject, switchMap, take } from 'rxjs';
 import { AuthService } from '../../../auth/core/services/auth.service';
 import {
   Firestore,
@@ -12,7 +12,7 @@ import {
 } from 'firebase/firestore';
 import { app } from '../../../../core/libs/firebase';
 import { EventsService } from '../../../../core/services/events.service';
-import firebase from 'firebase/compat';
+import { FirestoreService } from '../../../../core/services/firestore.service';
 
 @Injectable({
   providedIn: 'root'
@@ -42,7 +42,8 @@ export class CalendarService implements OnInit {
 
   constructor(
     private readonly _authService: AuthService,
-    private readonly _eventsService: EventsService
+    private readonly _eventsService: EventsService,
+    private readonly _firestoreService: FirestoreService
   ) {
     this.db = getFirestore(app);
   }
@@ -51,44 +52,42 @@ export class CalendarService implements OnInit {
   }
 
   public fetchMonth(year: number, month: number): void {
-    setTimeout(()=>this._eventsService.startLoading(), 100);
+    this._eventsService.startLoading();
 
-    const creator = this._authService.userSubject.getValue();
+    this._authService.user$.pipe(
+      take(1),
+      switchMap(user => {
+        const matchCreator = where('creator', '==', user!.id);
+        const matchYear = where('year', '==', year);
+        const matchMonth = where('month', '==', month);
 
-    const monthsRef = collection(this.db, 'months');
+        return this._firestoreService.getDocs('months', matchCreator, matchYear, matchMonth);
+      }),
+      finalize(() => this._eventsService.stopLoading()))
+      .subscribe({
+        next: (querySnapshot) => {
+          if (querySnapshot.docs.length) {
+            this.monthData = querySnapshot.docs[0].data();
+            this.monthDocRef = querySnapshot.docs[0].ref;
+            this.monthDocSubject$.next(this.monthDocRef);
+            const days = new Array(31).fill((0)).map((_, idx) => (idx + 1).toString());
 
-    const matchCreator = where('creator', '==', creator!.id);
-    const matchYear = where('year', '==', year);
-    const matchMonth = where('month', '==', month);
-
-    const q = query(monthsRef, matchCreator, matchYear, matchMonth);
-
-    getDocs(q)
-      .then((querySnapshot) => {
-        if (querySnapshot.docs.length) {
-          this.monthData = querySnapshot.docs[0].data();
-          this.monthDocRef = querySnapshot.docs[0].ref;
-          this.monthDocSubject$.next(this.monthDocRef);
-          const days = new Array(31).fill((0)).map((_, idx) => (idx + 1).toString());
-
-          for (let key in this.monthData) {
-            if (days.includes(key)) {
-              this.calendarData[+key - 1]['total'] = this.monthData[key].total;
-              this.calendarData[+key - 1]['completed'] = this.monthData[key].completed;
-              this.calendarSubject.next(this.calendarData);
+            for (let key in this.monthData) {
+              if (days.includes(key)) {
+                this.calendarData[+key - 1]['total'] = this.monthData[key].total;
+                this.calendarData[+key - 1]['completed'] = this.monthData[key].completed;
+                this.calendarSubject.next(this.calendarData);
+              }
             }
+          } else {
+            this.monthDocRef = undefined;
+            this.monthDocSubject$.next(undefined);
           }
-        } else {
-          this.monthDocRef = undefined;
-          this.monthDocSubject$.next(undefined);
+        },
+        error: (err) => {
+          console.log(err);
         }
-
-        console.log(this.monthDocRef);
-      })
-      .catch((err) => {
-        console.log(err);
-      })
-      .finally(() => this._eventsService.stopLoading());
+      });
   }
 
   public renderCalendar(): void {
